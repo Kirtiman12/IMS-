@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link href="/src/index.css" rel="stylesheet" />
+    <link rel="icon" type="image/webp1" href="/AS-logo.webp" />
+    <!-- PNG fallback for mobile/older browsers -->
+    <link
+      rel="icon"
+      type="image/png1"
+      sizes="32x32"
+      href="/AS-logo-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png1"
+      sizes="16x16"
+      href="/AS-logo-16x16.png"
+    />
+
+    <!-- iOS touch icon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/AS-logo-180x180.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kirtiman Biswas Portfolio</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <form
+      name="contact"
+      method="POST"
+      data-netlify="true"
+      data-netlify-honeypot="website"
+      hidden
+      netlify
+    >
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <textarea name="message"></textarea>
+      <input type="text" name="website" />
+    </form>
+    <form
+      name="enquiry"
+      method="POST"
+      data-netlify="true"
+      data-netlify-honeypot="website"
+      hidden
+      netlify
+    >
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <textarea name="message"></textarea>
+      <input type="text" name="website" />
+    </form>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

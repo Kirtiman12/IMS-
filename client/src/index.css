@@ -1,0 +1,273 @@
+@import url("../public/fonts/stylesheet.css");
+@import "tailwindcss";
+
+/* Custom styles (plain CSS, fine as-is) */
+.circle-shadow {
+  box-shadow: 0 0 6px 1px #e9904e, inset 0 0 6px 3px #f5c573;
+  animation: circleShadow 0.9s infinite alternate;
+}
+
+@keyframes circleShadow {
+  0% {
+    box-shadow: 0 0 6px 1px #e9904e, inset 0 0 6px 3px #f5c573;
+  }
+  100% {
+    box-shadow: 0 0 12px 2px #e9904e, inset 0 0 6px 3px #f5c573;
+  }
+}
+
+[data-scroll] {
+  will-change: transform, z-index;
+}
+
+/* Custom scrollbar styles */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scroll-down::before,
+.scroll-down::after {
+  content: "";
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  height: 1.3rem;
+  width: 1.3rem;
+  transform: translate(-50%, -70%) rotate(45deg);
+  border: 4px solid #f5c573; /* content-yellow */
+  border-top: transparent;
+  border-left: transparent;
+  animation: scroll-down 3s ease-in-out infinite;
+}
+
+.scroll-down::after {
+  animation-delay: 0.5s; /* Staggered effect */
+}
+
+@keyframes scroll-down {
+  0% {
+    top: 20%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: 80%;
+    opacity: 0;
+  }
+}
+
+body {
+  background-color: #191818;
+  color: white;
+  margin: 0;
+  line-height: inherit;
+}
+
+/* Custom variants for raw screens (enables prefixes like below-600:, below-900w:, above-1080:) */
+@custom-variant below-600 (@media (max-height: 600px));
+@custom-variant below-768 (@media (max-height: 768px));
+@custom-variant below-800 (@media (max-height: 800px));
+@custom-variant below-900 (@media (max-height: 900px));
+@custom-variant below-900w (@media (max-width: 900px));
+@custom-variant above-1080 (@media (min-height: 1081px));
+
+/* Additional keyframes (plain CSS, fine as-is) */
+@keyframes moveGradient {
+  0% {
+    background-position: 50% 0%;
+  }
+  12.5% {
+    background-position: 75% 25%;
+  }
+  25% {
+    background-position: 100% 50%;
+  }
+  37.5% {
+    background-position: 75% 75%;
+  }
+  50% {
+    background-position: 50% 100%;
+  }
+  62.5% {
+    background-position: 25% 75%;
+  }
+  75% {
+    background-position: 0% 50%;
+  }
+  87.5% {
+    background-position: 25% 25%;
+  }
+  100% {
+    background-position: 50% 0%;
+  }
+}
+
+/* Reusable button press keyframes */
+@keyframes press {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.85);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes press2 {
+  0% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(0.6);
+  }
+  100% {
+    transform: scale(0.8);
+  }
+}
+
+@keyframes press-mobile {
+  0% {
+    transform: scale(0.6);
+  }
+  50% {
+    transform: scale(0.5);
+  }
+  100% {
+    transform: scale(0.6);
+  }
+}
+
+/* Core keyframes from original config */
+@keyframes scale-up-down {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.8);
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(-100vh);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInScale1 {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes scroll {
+  to {
+    transform: translate(calc(-50% - 0.5rem));
+  }
+}
+
+@keyframes vertical-scroll {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+/* Theme with all migrated elements (dark mode class-enabled by default; no "extend" needed) */
+@theme {
+  /* Custom colors from original config */
+  --color-content-orange: #e24815;
+  --color-content-red: #e42115;
+  --color-content-yellow: #f5c573;
+  --color-content-grey: #3b3b3b;
+
+  /* Custom font families from original config */
+  --font-family-mariposa: "Mariposa", sans-serif;
+  --font-family-general-sans: "General Sans", sans-serif;
+
+  /* Container configuration from original config (center true by default) */
+  --container-padding: 1rem;
+  --container-padding-sm: 2rem;
+  --container-padding-lg: 4rem;
+  --container-padding-xl: 5rem;
+  --container-padding-2xl: 6rem;
+
+  /* Full custom breakpoints (all in rem for consistency; includes defaults + originals) */
+  --breakpoint-smaller: 320px;
+  --breakpoint-small: 375px;
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-textbp: 850px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  --breakpoint-3xl: 1920px;
+  --breakpoint-4xl: 2560px;
+
+  /* Custom animations from original config (references defined keyframes) */
+  --animate-scale-up-down: scale-up-down 0.3s ease-in-out;
+  --animate-slide-up: slideUp 0.8s ease forwards;
+  --animate-fade-in-scale1: fadeInScale1 3s ease forwards;
+  --animate-scroll: scroll var(--animation-duration, 40s)
+    var(--animation-direction, forwards) linear infinite;
+  --animate-vertical-scroll: vertical-scroll 70s linear infinite;
+}
+
+/* Utilities layer (all good; @apply works for composition) */
+@layer utilities {
+  .center {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .click-press {
+    animation: press 200ms ease-in-out;
+    transition: transform 0.5s ease-in-out;
+  }
+
+  .click-press2 {
+    animation: press2 200ms ease-in-out;
+    transition: transform 0.5s ease-in-out;
+  }
+
+  .press-mobile {
+    animation: press-mobile 200ms ease-out;
+    transition: transform 0.5s ease-in-out;
+  }
+
+  .full-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .page-container {
+    @apply container mx-auto px-4 sm:px-6 py-8 max-w-7xl;
+  }
+
+  .square-container {
+    @apply w-screen h-screen 3xl:max-w-full 3xl:max-h-full 4xl:aspect-square 4xl:h-auto mx-auto flex flex-col justify-center items-center min-h-[768px] max-h-max;
+  }
+}

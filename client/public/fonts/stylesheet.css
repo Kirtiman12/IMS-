@@ -1,0 +1,121 @@
+/* Mariposa Font Family */
+@font-face {
+  font-family: "Mariposa";
+  src: url("./Mariposa Sans Std Black.woff2") format("woff2");
+  font-weight: 900; /* Black */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Mariposa";
+  src: url("./Mariposa Sans Std Bold.woff2") format("woff2");
+  font-weight: 700; /* Bold */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Mariposa";
+  src: url("./Mariposa Sans Std Medium.woff2") format("woff2");
+  font-weight: 500; /* Medium */
+  font-style: normal;
+  font-display: swap;
+}
+
+/* General Sans Font Family */
+@font-face {
+  font-family: "General Sans";
+  src: url("./GeneralSans-ExtraLight.woff2") format("opentype");
+  font-weight: 200; /* ExtraLight */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "General Sans";
+  src: url("./GeneralSans-ExtraLightItalic.woff2") format("opentype");
+  font-weight: 200; /* ExtraLight */
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "General Sans";
+  src: url("./GeneralSans-Light.woff2") format("opentype");
+  font-weight: 300; /* Light */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "General Sans";
+  src: url("./GeneralSans-LightItalic.woff2") format("opentype");
+  font-weight: 300; /* Light */
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "General Sans";
+  src: url("./GeneralSans-Regular.woff2") format("opentype");
+  font-weight: 400; /* Regular */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "General Sans";
+  src: url("./GeneralSans-RegularItalic.woff2") format("opentype");
+  font-weight: 400; /* Regular */
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "General Sans";
+  src: url("./GeneralSans-Medium.woff2") format("opentype");
+  font-weight: 500; /* Medium */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "General Sans";
+  src: url("./GeneralSans-MediumItalic.woff2") format("opentype");
+  font-weight: 500; /* Medium */
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "General Sans";
+  src: url("./GeneralSans-SemiBold.woff2") format("opentype");
+  font-weight: 600; /* SemiBold */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "General Sans";
+  src: url("./GeneralSans-SemiBoldItalic.woff2") format("opentype");
+  font-weight: 600; /* SemiBold */
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "General Sans";
+  src: url("./GeneralSans-Bold.woff2") format("opentype");
+  font-weight: 700; /* Bold */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "General Sans";
+  src: url("./GeneralSans-BoldItalic.woff2") format("opentype");
+  font-weight: 700; /* Bold */
+  font-style: italic;
+  font-display: swap;
+}

@@ -5,7 +5,7 @@ import {
   updateProduct,
   deleteProduct,
   type Product,
-} from "../features/products/productsSlice";
+} from "../store/productsSlice";
 import { mockCategories, mockVendors } from "@/mock/mockData";
 import useClickEffect from "@/hooks/useClickEffect";
 import { Plus, Pencil, Trash2, Search, X, Package } from "lucide-react";

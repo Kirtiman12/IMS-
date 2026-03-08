@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { logout } from "@/features/auth/authSlice";
+import { logout } from "@/store/authSlice";
 import useClickEffect from "@/hooks/useClickEffect";
 import {
   LayoutDashboard,

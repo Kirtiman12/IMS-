@@ -51,7 +51,7 @@ const LoginPage = () => {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center"
+      className="min-h-screen flex items-center justify-center scale-[0.8] sm:scale-[1]"
       style={{ background: "#191818" }}
     >
       <div

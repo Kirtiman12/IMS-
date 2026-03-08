@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { addVendor, addPurchaseEntry } from "../features/vendors/vendorSlice";
+import { addVendor, addPurchaseEntry } from "../store/vendorSlice";
 import useClickEffect from "@/hooks/useClickEffect";
 import {
   Plus,

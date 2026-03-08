@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "@/app/hooks";
-import { loginSuccess } from "../features/auth/authSlice";
+import { loginSuccess } from "../store/authSlice";
 import { HARDCODED_USERS, type Role } from "@/mock/mockData";
 import useClickEffect from "@/hooks/useClickEffect";
 import { BoxIcon, Eye, EyeOff } from "lucide-react";

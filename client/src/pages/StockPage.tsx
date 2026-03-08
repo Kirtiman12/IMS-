@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { addStockEntry } from "../features/stock/stockSlice";
-import { adjustQuantity } from "@/features/products/productsSlice";
+import { addStockEntry } from "../store/stockSlice";
+import { adjustQuantity } from "@/store/productsSlice";
 import useClickEffect from "@/hooks/useClickEffect";
 import { TrendingUp, TrendingDown } from "lucide-react";
 

@@ -1,0 +1,11 @@
+// This is created only because The VS Code TypeScript server isn't picking up @types/node for files outside src/ 
+
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  }
+}

@@ -1,0 +1,165 @@
+IMS SETUP - 
+
+IMS/
+├── client/                        ← Vite + React
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── store.ts           ← Redux store
+│   │   │   └── api/               ← RTK Query base api + endpoints
+│   │   ├── features/
+│   │   │   ├── auth/              ← authSlice + login page
+│   │   │   ├── products/          ← productSlice + CRUD UI
+│   │   │   ├── stock/             ← stockSlice + in/out forms
+│   │   │   ├── vendors/           ← vendorSlice + purchase entries
+│   │   │   └── dashboard/         ← stats, low stock alerts
+│   │   ├── components/ui/         ← shadcn primitives
+│   │   ├── routes/
+│   │   │   └── ProtectedRoute.tsx ← RBAC guard
+│   │   └── pages/
+│
+├── server/                        ← Express API
+│   ├── src/
+│   │   ├── routes/
+│   │   │   ├── auth.routes.ts
+│   │   │   ├── product.routes.ts
+│   │   │   ├── stock.routes.ts
+│   │   │   ├── vendor.routes.ts
+│   │   │   └── dashboard.routes.ts
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   │   ├── authenticate.ts    ← JWT verify
+│   │   │   └── authorize.ts       ← RBAC role check
+│   │   ├── services/              ← business logic layer
+│   │   ├── prisma/
+│   │   │   └── schema.prisma
+│   │   └── redis/                 ← Redis client (optional)
+│   └── Dockerfile
+│
+└── docker-compose.yml
+
+
+
+
+
+Prisma Schema (Core Models) - 
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(VIEWER)
+  createdAt DateTime @default(now())
+}
+
+enum Role { ADMIN  MANAGER  VIEWER }
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  products Product[]
+}
+
+model Product {
+  id         String      @id @default(cuid())
+  name       String
+  sku        String      @unique
+  quantity   Int         @default(0)
+  threshold  Int         @default(10)   ← low stock alert trigger
+  categoryId String
+  category   Category    @relation(fields: [categoryId], references: [id])
+  stocks     StockEntry[]
+  vendorId   String?
+  vendor     Vendor?     @relation(fields: [vendorId], references: [id])
+}
+
+model StockEntry {
+  id        String    @id @default(cuid())
+  type      StockType  ← STOCK_IN | STOCK_OUT
+  quantity  Int
+  note      String?
+  productId String
+  product   Product   @relation(fields: [productId], references: [id])
+  createdAt DateTime  @default(now())
+}
+
+enum StockType { STOCK_IN  STOCK_OUT }
+
+model Vendor {
+  id        String          @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  products  Product[]
+  purchases PurchaseEntry[]
+}
+
+model PurchaseEntry {
+  id        String   @id @default(cuid())
+  vendorId  String
+  vendor    Vendor   @relation(fields: [vendorId], references: [id])
+  amount    Float
+  note      String?
+  createdAt DateTime @default(now())
+}
+
+
+Backend REST API Design - 
+
+AUTH
+POST   /api/auth/login
+POST   /api/auth/logout
+POST   /api/auth/refresh
+
+PRODUCTS
+GET    /api/products          (paginated, filter by category, search by SKU/name)
+POST   /api/products          ADMIN, MANAGER
+PUT    /api/products/:id      ADMIN, MANAGER
+DELETE /api/products/:id      ADMIN only
+
+STOCK
+GET    /api/stock/:productId  (history log)
+POST   /api/stock             ADMIN, MANAGER  { type: STOCK_IN/OUT, qty, productId }
+
+VENDORS
+GET    /api/vendors
+POST   /api/vendors           ADMIN
+GET    /api/vendors/:id/purchases
+POST   /api/vendors/:id/purchases   ADMIN, MANAGER
+
+DASHBOARD
+GET    /api/dashboard/stats        ← Redis cached (60s TTL)
+GET    /api/dashboard/low-stock    ← products where quantity <= threshold
+
+
+
+Docker Compose Skeleton - 
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ims_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+    ports: ["5432:5432"]
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  server:
+    build: ./server
+    depends_on: [db, redis]
+    environment:
+      DATABASE_URL: postgresql://admin:secret@db:5432/ims_db
+      REDIS_URL: redis://redis:6379
+    ports: ["5000:5000"]
+
+  client:
+    build: ./client
+    ports: ["5173:5173"]
+
+
+
+DB - MYSQL
+

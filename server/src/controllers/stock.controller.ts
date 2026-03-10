@@ -8,6 +8,12 @@ export const getHistory = async (req: Request, res: Response) => {
 };
 
 export const create = async (req: Request, res: Response) => {
-  const entry = await StockService.createStockEntry(req.body);
+  // Extract userId from JWT via authenticate middleware
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ message: "Unauthenticated" });
+    return;
+  }
+  const entry = await StockService.createStockEntry({ ...req.body, userId });
   res.status(201).json(entry);
 };

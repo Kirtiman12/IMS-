@@ -5,6 +5,7 @@ export interface StockEntry {
   id: string; productId: string;
   type: "STOCK_IN" | "STOCK_OUT";
   quantity: number; note: string; createdAt: string;
+  performedBy: string; 
 }
 
 const stockSlice = createSlice({

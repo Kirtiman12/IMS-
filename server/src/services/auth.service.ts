@@ -1,5 +1,5 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import bcrypt    from "bcryptjs";
+import jwt       from "jsonwebtoken";
 import { prisma } from "@/prisma/client";
 
 const signAccess  = (payload: object) =>
@@ -15,16 +15,45 @@ export const loginUser = async (email: string, password: string) => {
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) throw new Error("Invalid credentials");
 
-  const payload = { id: user.id, email: user.email, role: user.role };
-
+  const payload      = { id: user.id, email: user.email, role: user.role };
   const accessToken  = signAccess(payload);
   const refreshToken = signRefresh(payload);
 
-  // persist refresh token hash in DB
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { refreshToken },
+  await prisma.user.update({ where: { id: user.id }, data: { refreshToken } });
+
+  return {
+    accessToken,
+    refreshToken,
+    user: { id: user.id, name: user.name, email: user.email, role: user.role },
+  };
+};
+
+// ← NEW
+export const registerUser = async (data: {
+  name:     string;
+  email:    string;
+  password: string;
+  role?:    "ADMIN" | "MANAGER" | "VIEWER";
+}) => {
+  const existing = await prisma.user.findUnique({ where: { email: data.email } });
+  if (existing) throw new Error("Email already in use");
+
+  const hashed = await bcrypt.hash(data.password, 10);
+
+  const user = await prisma.user.create({
+    data: {
+      name:     data.name,
+      email:    data.email,
+      password: hashed,
+      role:     data.role ?? "VIEWER",
+    },
   });
+
+  const payload      = { id: user.id, email: user.email, role: user.role };
+  const accessToken  = signAccess(payload);
+  const refreshToken = signRefresh(payload);
+
+  await prisma.user.update({ where: { id: user.id }, data: { refreshToken } });
 
   return {
     accessToken,
@@ -49,8 +78,5 @@ export const refreshAccessToken = async (token: string) => {
 };
 
 export const logoutUser = async (userId: string) => {
-  await prisma.user.update({
-    where: { id: userId },
-    data: { refreshToken: null },
-  });
+  await prisma.user.update({ where: { id: userId }, data: { refreshToken: null } });
 };

@@ -2,40 +2,50 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 import Layout from "../components/Ui/Layout";
 import LoginPage from "@/pages/LoginPage";
-import DashboardPage from "../pages/DashboardPage";
-import ProductsPage from "../pages/ProductsPage";
-import StockPage from "../pages/StockPage";
-import VendorsPage from "../pages/VendorsPage";
-import Notfound from "../global/Notfound";
+import RegisterPage from "@/pages/RegisterPage";
+import DashboardPage from "@/pages/DashboardPage";
+import ProductsPage from "@/pages/ProductsPage";
+import ProductDetailPage from "@/pages/ProductDetailPage";
+import StockPage from "@/pages/StockPage";
+import VendorsPage from "@/pages/VendorsPage";
+import Notfound from "@/global/Notfound";
 
 const AppRoutes = () => (
   <Routes>
-    <Route path="/" element={<Navigate to="/login" replace />} />
+    {/* Public routes */}
     <Route path="/login" element={<LoginPage />} />
+    <Route path="/register" element={<RegisterPage />} />
 
+    {/* Protected routes */}
     <Route element={<ProtectedRoute />}>
       <Route element={<Layout />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/products" element={<ProductsPage />} />
+        <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route path="/stock" element={<StockPage />} />
         <Route path="/vendors" element={<VendorsPage />} />
 
-        <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
-          <Route
-            path="/settings"
-            element={
-              <div className="p-8">
-                <h1 className="text-2xl font-bold text-white">Settings</h1>
-                <p className="mt-2 text-sm" style={{ color: "#666" }}>
+        {/* Admin only */}
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <div className="p-6">
+                <h1 className="text-white text-xl font-bold">Settings</h1>
+                <p className="text-sm mt-1" style={{ color: "#666" }}>
                   Admin-only area.
                 </p>
               </div>
-            }
-          />
-        </Route>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Default redirect */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Route>
     </Route>
 
+    {/* 404 */}
     <Route path="*" element={<Notfound />} />
   </Routes>
 );

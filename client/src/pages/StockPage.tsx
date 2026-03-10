@@ -10,6 +10,7 @@ const StockPage = () => {
   const products = useAppSelector((s) => s.products.items);
   const entries = useAppSelector((s) => s.stock.entries);
   const userRole = useAppSelector((s) => s.auth.user?.role);
+  const userName = useAppSelector((s) => s.auth.user?.name ?? "Unknown");
 
   const [tab, setTab] = useState<"STOCK_IN" | "STOCK_OUT">("STOCK_IN");
   const [productId, setProduct] = useState(products[0]?.id ?? "");
@@ -19,13 +20,20 @@ const StockPage = () => {
 
   const { clickClass, handleClick } = useClickEffect("click-press");
   const canEdit = userRole === "ADMIN" || userRole === "MANAGER";
-
   const getProd = (id: string) => products.find((p) => p.id === id);
 
   const handleSubmit = () => {
     handleClick();
     if (!productId || quantity <= 0) return;
-    dispatch(addStockEntry({ productId, type: tab, quantity, note }));
+    dispatch(
+      addStockEntry({
+        productId,
+        type: tab,
+        quantity,
+        note,
+        performedBy: userName,
+      }),
+    );
     dispatch(
       adjustQuantity({
         productId,
@@ -51,7 +59,6 @@ const StockPage = () => {
         </p>
       </div>
 
-      {/* Layout: stacked on mobile, side-by-side on desktop */}
       <div className="flex flex-col md:grid md:grid-cols-3 gap-5">
         {/* Form */}
         {canEdit && (
@@ -84,29 +91,29 @@ const StockPage = () => {
               ))}
             </div>
 
-            {[{ label: "Product", isSelect: true }].map(() => (
-              <div key="product" className="mb-4">
-                <label
-                  className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
-                  style={{ color: "#888" }}
-                >
-                  Product
-                </label>
-                <select
-                  value={productId}
-                  onChange={(e) => setProduct(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none"
-                  style={{ background: "#2a2a2a", border: "1px solid #333" }}
-                >
-                  {products.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({p.sku})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ))}
+            {/* Product select */}
+            <div className="mb-4">
+              <label
+                className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
+                style={{ color: "#888" }}
+              >
+                Product
+              </label>
+              <select
+                value={productId}
+                onChange={(e) => setProduct(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none"
+                style={{ background: "#2a2a2a", border: "1px solid #333" }}
+              >
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} ({p.sku})
+                  </option>
+                ))}
+              </select>
+            </div>
 
+            {/* Quantity */}
             <div className="mb-4">
               <label
                 className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
@@ -124,6 +131,7 @@ const StockPage = () => {
               />
             </div>
 
+            {/* Note */}
             <div className="mb-5">
               <label
                 className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
@@ -138,6 +146,26 @@ const StockPage = () => {
                 className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none"
                 style={{ background: "#2a2a2a", border: "1px solid #333" }}
               />
+            </div>
+
+            {/* Performed by — readonly, shows current user */}
+            <div className="mb-5">
+              <label
+                className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
+                style={{ color: "#888" }}
+              >
+                Performed By
+              </label>
+              <div
+                className="w-full px-3 py-2.5 rounded-lg text-sm"
+                style={{
+                  background: "#242424",
+                  color: "#aaa",
+                  border: "1px solid #2a2a2a",
+                }}
+              >
+                {userName}
+              </div>
             </div>
 
             {/* Stock preview */}
@@ -208,7 +236,7 @@ const StockPage = () => {
                     borderBottom: "1px solid #222",
                   }}
                 >
-                  {["Date", "Product", "SKU", "Type", "Qty", "Note"].map(
+                  {["Date", "Product", "SKU", "Type", "Qty", "Note", "By"].map(
                     (h) => (
                       <th
                         key={h}
@@ -272,6 +300,15 @@ const StockPage = () => {
                       <td className="px-4 py-3" style={{ color: "#666" }}>
                         {e.note || "—"}
                       </td>
+                      {/* ← NEW: performed by column */}
+                      <td className="px-4 py-3">
+                        <span
+                          className="text-xs px-2 py-0.5 rounded"
+                          style={{ background: "#2a2a2a", color: "#aaa" }}
+                        >
+                          {(e as any).performedBy ?? "—"}
+                        </span>
+                      </td>
                     </tr>
                   );
                 })}
@@ -279,7 +316,7 @@ const StockPage = () => {
             </table>
           </div>
 
-          {/* Mobile cards for history */}
+          {/* Mobile cards */}
           <div className="md:hidden">
             <p className="text-sm font-semibold text-white mb-3">
               Movement History
@@ -356,6 +393,18 @@ const StockPage = () => {
                           month: "short",
                           year: "2-digit",
                         })}
+                      </span>
+                    </div>
+                    {/* ← NEW: performed by on mobile */}
+                    <div className="mt-2 flex items-center gap-1.5">
+                      <span className="text-xs" style={{ color: "#555" }}>
+                        By:
+                      </span>
+                      <span
+                        className="text-xs px-2 py-0.5 rounded"
+                        style={{ background: "#2a2a2a", color: "#aaa" }}
+                      >
+                        {(e as any).performedBy ?? "—"}
                       </span>
                     </div>
                   </div>

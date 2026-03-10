@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAppDispatch } from "@/app/hooks";
 import { loginSuccess } from "../store/authSlice";
 import { HARDCODED_USERS, type Role } from "@/mock/mockData";
@@ -51,7 +51,7 @@ const LoginPage = () => {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center scale-[0.8] sm:scale-[1]"
+      className="min-h-screen flex items-center justify-center"
       style={{ background: "#191818" }}
     >
       <div
@@ -157,6 +157,18 @@ const LoginPage = () => {
         >
           Sign In
         </button>
+
+        {/* ← NEW: Register link */}
+        <p className="text-center text-sm mt-5" style={{ color: "#555" }}>
+          Don't have an account?{" "}
+          <Link
+            to="/register"
+            className="font-medium"
+            style={{ color: "#e24815" }}
+          >
+            Create one
+          </Link>
+        </p>
 
         {/* Demo hint */}
         <div

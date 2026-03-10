@@ -2,15 +2,14 @@ import type { Request, Response } from "express";
 import * as ProductService from "@/services/product.service";
 
 export const getAll = async (req: Request, res: Response) => {
-  const { categoryId, search } = req.query;
-  const products = await ProductService.getAllProducts(
-    categoryId as string,
-    search    as string
-  );
+  const categoryId = req.query.categoryId as string | undefined;
+  const search     = req.query.search     as string | undefined;
+  const sortBy     = req.query.sortBy     as string | undefined;
+  const products   = await ProductService.getAllProducts(categoryId, search, sortBy);
   res.json(products);
 };
 
-export const getOne = async (req: Request, res: Response) => {
+export const getById = async (req: Request, res: Response) => {
   const product = await ProductService.getProductById(req.params.id);
   if (!product) { res.status(404).json({ message: "Product not found" }); return; }
   res.json(product);

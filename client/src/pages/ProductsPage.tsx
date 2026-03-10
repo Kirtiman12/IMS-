@@ -1,14 +1,15 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import {
   addProduct,
   updateProduct,
   deleteProduct,
   type Product,
-} from "../store/productsSlice";
+} from "@/store/productsSlice";
 import { mockCategories, mockVendors } from "@/mock/mockData";
 import useClickEffect from "@/hooks/useClickEffect";
-import { Plus, Pencil, Trash2, Search, X, Package } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, X, Package, Eye } from "lucide-react";
 
 const EMPTY: Omit<Product, "id"> = {
   name: "",
@@ -17,15 +18,20 @@ const EMPTY: Omit<Product, "id"> = {
   quantity: 0,
   threshold: 10,
   vendorId: "v1",
+  description: "",
+  price: 0,
+  supplierName: "",
 };
 
 const ProductsPage = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const products = useAppSelector((s) => s.products.items);
   const userRole = useAppSelector((s) => s.auth.user?.role);
 
   const [search, setSearch] = useState("");
   const [catFilter, setCat] = useState("all");
+  const [sort, setSort] = useState("default");
   const [showModal, setShow] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [form, setForm] = useState<Omit<Product, "id">>(EMPTY);
@@ -53,12 +59,21 @@ const ProductsPage = () => {
     );
   });
 
+  const sorted = [...filtered].sort((a, b) => {
+    if (sort === "qty-asc") return a.quantity - b.quantity;
+    if (sort === "qty-desc") return b.quantity - a.quantity;
+    if (sort === "price-asc") return (a.price ?? 0) - (b.price ?? 0);
+    if (sort === "price-desc") return (b.price ?? 0) - (a.price ?? 0);
+    return 0;
+  });
+
   const openAdd = () => {
     addClick();
     setEditing(null);
     setForm(EMPTY);
     setShow(true);
   };
+
   const openEdit = (p: Product) => {
     setEditing(p);
     setForm({
@@ -68,9 +83,13 @@ const ProductsPage = () => {
       quantity: p.quantity,
       threshold: p.threshold,
       vendorId: p.vendorId,
+      description: p.description ?? "",
+      price: p.price ?? 0,
+      supplierName: p.supplierName ?? "",
     });
     setShow(true);
   };
+
   const handleSave = () => {
     saveClick();
     editing
@@ -78,6 +97,7 @@ const ProductsPage = () => {
       : dispatch(addProduct(form));
     setShow(false);
   };
+
   const handleDelete = () => {
     delClick();
     if (deleteId) dispatch(deleteProduct(deleteId));
@@ -107,7 +127,7 @@ const ProductsPage = () => {
         )}
       </div>
 
-      {/* Filters */}
+      {/* Filters + Sort */}
       <div className="flex flex-col xs:flex-row gap-2 mb-4">
         <div className="relative flex-1">
           <Search
@@ -136,9 +156,22 @@ const ProductsPage = () => {
             </option>
           ))}
         </select>
+        {/* Sort dropdown */}
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+          className="px-3 py-2.5 rounded-lg text-sm text-white outline-none"
+          style={{ background: "#1e1e1e", border: "1px solid #2a2a2a" }}
+        >
+          <option value="default">Sort By</option>
+          <option value="qty-asc">Qty: Low → High</option>
+          <option value="qty-desc">Qty: High → Low</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+        </select>
       </div>
 
-      {/* Desktop table — hidden below md */}
+      {/* Desktop Table */}
       <div
         className="hidden md:block rounded-xl overflow-hidden"
         style={{ border: "1px solid #242424" }}
@@ -155,9 +188,10 @@ const ProductsPage = () => {
                 "Product",
                 "SKU",
                 "Category",
+                "Price",
                 "Qty",
                 "Threshold",
-                "Vendor",
+                "Supplier",
                 "Actions",
               ].map((h) => (
                 <th
@@ -171,7 +205,7 @@ const ProductsPage = () => {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((p, i) => {
+            {sorted.map((p, i) => {
               const isLow = p.quantity <= p.threshold;
               return (
                 <tr
@@ -193,6 +227,11 @@ const ProductsPage = () => {
                       {getCat(p.categoryId)}
                     </span>
                   </td>
+                  <td className="px-4 py-3" style={{ color: "#aaa" }}>
+                    {p.price != null && p.price > 0
+                      ? `₹${p.price.toFixed(2)}`
+                      : "—"}
+                  </td>
                   <td className="px-4 py-3">
                     <span
                       className="font-semibold"
@@ -200,15 +239,32 @@ const ProductsPage = () => {
                     >
                       {p.quantity}
                     </span>
+                    {isLow && (
+                      <span
+                        className="ml-1.5 text-xs px-1.5 py-0.5 rounded"
+                        style={{ background: "#e2481520", color: "#e24815" }}
+                      >
+                        Low
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3" style={{ color: "#666" }}>
                     {p.threshold}
                   </td>
                   <td className="px-4 py-3" style={{ color: "#888" }}>
-                    {getVen(p.vendorId)}
+                    {p.supplierName || getVen(p.vendorId)}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
+                      {/* Detail view button */}
+                      <button
+                        onClick={() => navigate(`/products/${p.id}`)}
+                        className="p-1.5 rounded-lg"
+                        style={{ color: "#555", background: "#242424" }}
+                        title="View details"
+                      >
+                        <Eye size={13} />
+                      </button>
                       {canEdit && (
                         <button
                           onClick={() => openEdit(p)}
@@ -234,16 +290,17 @@ const ProductsPage = () => {
             })}
           </tbody>
         </table>
-        {filtered.length === 0 && (
-          <div className="py-12 text-center text-sm" style={{ color: "#555" }}>
-            No products found.
+        {sorted.length === 0 && (
+          <div className="py-12 text-center" style={{ color: "#555" }}>
+            <Package size={32} className="mx-auto mb-2 opacity-30" />
+            <p className="text-sm">No products found.</p>
           </div>
         )}
       </div>
 
-      {/* Mobile cards — shown below md */}
+      {/* Mobile Cards */}
       <div className="md:hidden flex flex-col gap-3">
-        {filtered.length === 0 ? (
+        {sorted.length === 0 ? (
           <div
             className="py-10 text-center rounded-xl"
             style={{
@@ -252,10 +309,11 @@ const ProductsPage = () => {
               color: "#555",
             }}
           >
-            No products found.
+            <Package size={28} className="mx-auto mb-2 opacity-30" />
+            <p className="text-sm">No products found.</p>
           </div>
         ) : (
-          filtered.map((p) => {
+          sorted.map((p) => {
             const isLow = p.quantity <= p.threshold;
             return (
               <div
@@ -277,6 +335,15 @@ const ProductsPage = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
+                    {/* Detail view button */}
+                    <button
+                      onClick={() => navigate(`/products/${p.id}`)}
+                      className="p-1.5 rounded-lg"
+                      style={{ background: "#2a2a2a", color: "#666" }}
+                      title="View details"
+                    >
+                      <Eye size={13} />
+                    </button>
                     {canEdit && (
                       <button
                         onClick={() => openEdit(p)}
@@ -298,62 +365,84 @@ const ProductsPage = () => {
                   </div>
                 </div>
 
-                {/* Card fields grid */}
+                {/* Card fields */}
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { label: "Category", value: getCat(p.categoryId) },
-                    { label: "Vendor", value: getVen(p.vendorId) },
-                    { label: "Threshold", value: p.threshold },
+                    {
+                      label: "Price",
+                      value:
+                        p.price && p.price > 0 ? `₹${p.price.toFixed(2)}` : "—",
+                    },
+                    {
+                      label: "Supplier",
+                      value: p.supplierName || getVen(p.vendorId),
+                    },
+                    { label: "Threshold", value: String(p.threshold) },
                   ].map(({ label, value }) => (
                     <div
                       key={label}
-                      className="px-3 py-2 rounded-lg"
+                      className="px-2 py-1.5 rounded-lg"
                       style={{ background: "#242424" }}
                     >
                       <p className="text-xs mb-0.5" style={{ color: "#555" }}>
                         {label}
                       </p>
-                      <p className="text-sm text-white">{value}</p>
+                      <p className="text-xs text-white truncate">{value}</p>
                     </div>
                   ))}
+                </div>
 
-                  {/* Quantity with badge */}
-                  <div
-                    className="px-3 py-2 rounded-lg"
-                    style={{ background: isLow ? "#e2481515" : "#242424" }}
-                  >
-                    <p className="text-xs mb-0.5" style={{ color: "#555" }}>
-                      Quantity
-                    </p>
-                    <p
+                {/* Quantity */}
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-xs" style={{ color: "#555" }}>
+                    Quantity
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span
                       className="text-sm font-bold"
                       style={{ color: isLow ? "#e24815" : "#10b981" }}
                     >
                       {p.quantity}
-                      {isLow && (
-                        <span className="ml-1 text-xs font-normal">(Low)</span>
-                      )}
-                    </p>
+                    </span>
+                    {isLow && (
+                      <span
+                        className="text-xs px-1.5 py-0.5 rounded"
+                        style={{ background: "#e2481520", color: "#e24815" }}
+                      >
+                        Low
+                      </span>
+                    )}
                   </div>
                 </div>
+
+                {/* Description if present */}
+                {p.description && (
+                  <p
+                    className="text-xs mt-2 line-clamp-2"
+                    style={{ color: "#555" }}
+                  >
+                    {p.description}
+                  </p>
+                )}
               </div>
             );
           })
         )}
       </div>
 
-      {/* Add/Edit Modal */}
+      {/* Add / Edit Modal */}
       {showModal && (
         <div
-          className="fixed inset-0 z-50 flex items-end xs:items-center justify-center"
-          style={{ background: "#000000bb" }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}
         >
           <div
-            className="w-full xs:max-w-md p-5 xs:rounded-2xl rounded-t-2xl max-h-[90vh] overflow-y-auto scrollbar-hide"
+            className="w-full max-w-md rounded-2xl p-6 max-h-[90vh] overflow-y-auto"
             style={{ background: "#1e1e1e", border: "1px solid #2a2a2a" }}
           >
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-white">
+              <h2 className="text-white font-bold text-lg">
                 {editing ? "Edit Product" : "Add Product"}
               </h2>
               <button onClick={() => setShow(false)} style={{ color: "#666" }}>
@@ -361,88 +450,191 @@ const ProductsPage = () => {
               </button>
             </div>
 
-            {[
-              { label: "Product Name", key: "name", type: "text" },
-              { label: "SKU", key: "sku", type: "text" },
-              { label: "Quantity", key: "quantity", type: "number" },
-              {
-                label: "Low Stock Threshold",
-                key: "threshold",
-                type: "number",
-              },
-            ].map(({ label, key, type }) => (
-              <div key={key} className="mb-4">
+            <div className="flex flex-col gap-4">
+              {/* Name */}
+              <div>
                 <label
                   className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
                   style={{ color: "#888" }}
                 >
-                  {label}
+                  Product Name
                 </label>
                 <input
-                  type={type}
-                  value={(form as any)[key]}
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none"
+                  style={{ background: "#2a2a2a", border: "1px solid #333" }}
+                />
+              </div>
+
+              {/* SKU */}
+              <div>
+                <label
+                  className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
+                  style={{ color: "#888" }}
+                >
+                  SKU
+                </label>
+                <input
+                  value={form.sku}
+                  onChange={(e) => setForm({ ...form, sku: e.target.value })}
+                  className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none"
+                  style={{ background: "#2a2a2a", border: "1px solid #333" }}
+                />
+              </div>
+
+              {/* Category */}
+              <div>
+                <label
+                  className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
+                  style={{ color: "#888" }}
+                >
+                  Category
+                </label>
+                <select
+                  value={form.categoryId}
                   onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      [key]:
-                        type === "number"
-                          ? Number(e.target.value)
-                          : e.target.value,
-                    }))
+                    setForm({ ...form, categoryId: e.target.value })
+                  }
+                  className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none"
+                  style={{ background: "#2a2a2a", border: "1px solid #333" }}
+                >
+                  {mockCategories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Quantity + Threshold */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label
+                    className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
+                    style={{ color: "#888" }}
+                  >
+                    Quantity
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.quantity}
+                    onChange={(e) =>
+                      setForm({ ...form, quantity: Number(e.target.value) })
+                    }
+                    className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none"
+                    style={{ background: "#2a2a2a", border: "1px solid #333" }}
+                  />
+                </div>
+                <div>
+                  <label
+                    className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
+                    style={{ color: "#888" }}
+                  >
+                    Threshold
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.threshold}
+                    onChange={(e) =>
+                      setForm({ ...form, threshold: Number(e.target.value) })
+                    }
+                    className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none"
+                    style={{ background: "#2a2a2a", border: "1px solid #333" }}
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label
+                  className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
+                  style={{ color: "#888" }}
+                >
+                  Description
+                </label>
+                <textarea
+                  rows={2}
+                  value={form.description ?? ""}
+                  onChange={(e) =>
+                    setForm({ ...form, description: e.target.value })
+                  }
+                  placeholder="Optional product description"
+                  className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none resize-none"
+                  style={{ background: "#2a2a2a", border: "1px solid #333" }}
+                />
+              </div>
+
+              {/* Price */}
+              <div>
+                <label
+                  className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
+                  style={{ color: "#888" }}
+                >
+                  Price (₹)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={form.price ?? 0}
+                  onChange={(e) =>
+                    setForm({ ...form, price: parseFloat(e.target.value) })
                   }
                   className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none"
                   style={{ background: "#2a2a2a", border: "1px solid #333" }}
                 />
               </div>
-            ))}
 
-            <div className="mb-4">
-              <label
-                className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
-                style={{ color: "#888" }}
-              >
-                Category
-              </label>
-              <select
-                value={form.categoryId}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, categoryId: e.target.value }))
-                }
-                className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none"
-                style={{ background: "#2a2a2a", border: "1px solid #333" }}
-              >
-                {mockCategories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              {/* Supplier Name */}
+              <div>
+                <label
+                  className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
+                  style={{ color: "#888" }}
+                >
+                  Supplier Name
+                </label>
+                <input
+                  type="text"
+                  value={form.supplierName ?? ""}
+                  onChange={(e) =>
+                    setForm({ ...form, supplierName: e.target.value })
+                  }
+                  placeholder="e.g. TechSupply Co."
+                  className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none"
+                  style={{ background: "#2a2a2a", border: "1px solid #333" }}
+                />
+              </div>
+
+              {/* Vendor */}
+              <div>
+                <label
+                  className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
+                  style={{ color: "#888" }}
+                >
+                  Vendor
+                </label>
+                <select
+                  value={form.vendorId ?? ""}
+                  onChange={(e) =>
+                    setForm({ ...form, vendorId: e.target.value })
+                  }
+                  className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none"
+                  style={{ background: "#2a2a2a", border: "1px solid #333" }}
+                >
+                  <option value="">No vendor</option>
+                  {mockVendors.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div className="mb-6">
-              <label
-                className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
-                style={{ color: "#888" }}
-              >
-                Vendor
-              </label>
-              <select
-                value={form.vendorId ?? ""}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, vendorId: e.target.value }))
-                }
-                className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none"
-                style={{ background: "#2a2a2a", border: "1px solid #333" }}
-              >
-                {mockVendors.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex gap-3">
+            <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setShow(false)}
                 className="flex-1 py-2.5 rounded-lg text-sm font-medium"
@@ -455,27 +647,27 @@ const ProductsPage = () => {
                 className={`flex-1 py-2.5 rounded-lg text-sm font-semibold text-white ${saveCls}`}
                 style={{ background: "#e24815" }}
               >
-                {editing ? "Save Changes" : "Add Product"}
+                {editing ? "Update" : "Add Product"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Delete confirm */}
+      {/* Delete Confirm Modal */}
       {deleteId && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center px-4"
-          style={{ background: "#000000bb" }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}
         >
           <div
-            className="w-full max-w-sm p-6 rounded-2xl"
+            className="w-full max-w-sm rounded-2xl p-6"
             style={{ background: "#1e1e1e", border: "1px solid #2a2a2a" }}
           >
-            <h2 className="text-lg font-bold text-white mb-2">
+            <h2 className="text-white font-bold text-lg mb-2">
               Delete Product?
             </h2>
-            <p className="text-sm mb-6" style={{ color: "#888" }}>
+            <p className="text-sm mb-6" style={{ color: "#666" }}>
               This action cannot be undone.
             </p>
             <div className="flex gap-3">

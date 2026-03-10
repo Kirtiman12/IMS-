@@ -19,14 +19,15 @@ enum StockType {
 }
 
 model User {
-  id           String   @id @default(uuid())
+  id           String       @id @default(uuid())
   name         String
-  email        String   @unique
+  email        String       @unique
   password     String
-  role         Role     @default(VIEWER)
+  role         Role         @default(VIEWER)
   refreshToken String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  stockEntries StockEntry[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }
 
 model Category {
@@ -52,6 +53,9 @@ model Product {
   id           String       @id @default(uuid())
   name         String
   sku          String       @unique
+  description  String?      @db.Text
+  price        Decimal?     @db.Decimal(10, 2)
+  supplierName String?
   quantity     Int          @default(0)
   threshold    Int          @default(10)
   categoryId   String
@@ -70,6 +74,8 @@ model StockEntry {
   note      String?
   productId String
   product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
   createdAt DateTime  @default(now())
 }
 

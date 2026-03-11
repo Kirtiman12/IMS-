@@ -1,165 +1,117 @@
 IMS SETUP - 
 
-IMS/
-├── client/                        ← Vite + React
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── store.ts           ← Redux store
-│   │   │   └── api/               ← RTK Query base api + endpoints
-│   │   ├── features/
-│   │   │   ├── auth/              ← authSlice + login page
-│   │   │   ├── products/          ← productSlice + CRUD UI
-│   │   │   ├── stock/             ← stockSlice + in/out forms
-│   │   │   ├── vendors/           ← vendorSlice + purchase entries
-│   │   │   └── dashboard/         ← stats, low stock alerts
-│   │   ├── components/ui/         ← shadcn primitives
-│   │   ├── routes/
-│   │   │   └── ProtectedRoute.tsx ← RBAC guard
-│   │   └── pages/
-│
-├── server/                        ← Express API
-│   ├── src/
-│   │   ├── routes/
-│   │   │   ├── auth.routes.ts
-│   │   │   ├── product.routes.ts
-│   │   │   ├── stock.routes.ts
-│   │   │   ├── vendor.routes.ts
-│   │   │   └── dashboard.routes.ts
-│   │   ├── controllers/
-│   │   ├── middleware/
-│   │   │   ├── authenticate.ts    ← JWT verify
-│   │   │   └── authorize.ts       ← RBAC role check
-│   │   ├── services/              ← business logic layer
-│   │   ├── prisma/
-│   │   │   └── schema.prisma
-│   │   └── redis/                 ← Redis client (optional)
-│   └── Dockerfile
-│
-└── docker-compose.yml
+```
+└── 📁IMS
+    └── 📁client
+        └── 📁public
+            └── 📁fonts
+                ├── stylesheet.css
+        └── 📁src
+            └── 📁app
+                ├── hooks.ts
+                ├── store.ts
+            └── 📁components
+                └── 📁Ui
+                    ├── Layout.tsx
+                    ├── Sidebar.tsx
+                    ├── Toast.tsx
+            └── 📁global
+                ├── Loader.tsx
+                ├── Notfound.tsx
+            └── 📁hooks
+                ├── useBreakpoint.tsx
+                ├── useClickEffect.tsx
+            └── 📁lib
+                ├── utils.ts
+            └── 📁mock
+                ├── mockData.ts
+            └── 📁pages
+                ├── DashboardPage.tsx
+                ├── LoginPage.tsx
+                ├── ProductDetailPage.tsx
+                ├── ProductsPage.tsx
+                ├── RegisterPage.tsx
+                ├── StockPage.tsx
+                ├── VendorsPage.tsx
+            └── 📁routes
+                ├── AppRoutes.tsx
+                ├── ProtectedRoute.tsx
+            └── 📁services
+                ├── axiosInstance.ts
+            └── 📁store
+                ├── authSlice.ts
+                ├── productsSlice.ts
+                ├── stockSlice.ts
+                ├── vendorSlice.ts
+            ├── App.css
+            ├── App.tsx
+            ├── index.css
+            ├── main.tsx
+            ├── vite-env.d.ts
+        └── 📁types
+            ├── tailwind.d.ts
+            ├── tailwindcss-animate.d.ts
+        ├── .env
+        ├── .gitignore
+        ├── eslint.config.js
+        ├── index.html
+        ├── package-lock.json
+        ├── package.json
+        ├── README.md
+        ├── tsconfig.app.json
+        ├── tsconfig.json
+        ├── tsconfig.node.json
+        ├── tsconfig.tsbuildinfo
+        ├── vite.config.ts
+
+
+        
+    └── 📁server
+        └── 📁prisma
+            └── 📁migrations
+                └── 📁20260310172147_init
+                    ├── migration.sql
+                └── 📁20260311110422_make_category_id_optional
+                    ├── migration.sql
+                ├── migration_lock.toml
+            ├── schema.prisma
+            ├── seed.ts
+            ├── tsconfig.json
+        └── 📁src
+            └── 📁controllers
+                ├── auth.controller.ts
+                ├── dashboard.controller.ts
+                ├── product.controller.ts
+                ├── stock.controller.ts
+                ├── vendor.controller.ts
+            └── 📁middleware
+                ├── authenticate.ts
+                ├── authorize.ts
+            └── 📁prisma
+                ├── client.ts
+            └── 📁routes
+                ├── auth.routes.ts
+                ├── dashboard.routes.ts
+                ├── product.routes.ts
+                ├── stock.routes.ts
+                ├── vendor.routes.ts
+            └── 📁services
+                ├── auth.service.ts
+                ├── dashboard.service.ts
+                ├── product.service.ts
+                ├── stock.service.ts
+                ├── vendor.service.ts
+            └── 📁types
+                ├── express.d.ts
+            ├── app.ts
+            ├── index.ts
+        ├── .env
+        ├── .gitignore
+        ├── package-lock.json
+        ├── package.json
+        └── tsconfig.json
+```
 
 
 
-
-
-Prisma Schema (Core Models) - 
-
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  role      Role     @default(VIEWER)
-  createdAt DateTime @default(now())
-}
-
-enum Role { ADMIN  MANAGER  VIEWER }
-
-model Category {
-  id       String    @id @default(cuid())
-  name     String    @unique
-  products Product[]
-}
-
-model Product {
-  id         String      @id @default(cuid())
-  name       String
-  sku        String      @unique
-  quantity   Int         @default(0)
-  threshold  Int         @default(10)   ← low stock alert trigger
-  categoryId String
-  category   Category    @relation(fields: [categoryId], references: [id])
-  stocks     StockEntry[]
-  vendorId   String?
-  vendor     Vendor?     @relation(fields: [vendorId], references: [id])
-}
-
-model StockEntry {
-  id        String    @id @default(cuid())
-  type      StockType  ← STOCK_IN | STOCK_OUT
-  quantity  Int
-  note      String?
-  productId String
-  product   Product   @relation(fields: [productId], references: [id])
-  createdAt DateTime  @default(now())
-}
-
-enum StockType { STOCK_IN  STOCK_OUT }
-
-model Vendor {
-  id        String          @id @default(cuid())
-  name      String
-  email     String?
-  phone     String?
-  products  Product[]
-  purchases PurchaseEntry[]
-}
-
-model PurchaseEntry {
-  id        String   @id @default(cuid())
-  vendorId  String
-  vendor    Vendor   @relation(fields: [vendorId], references: [id])
-  amount    Float
-  note      String?
-  createdAt DateTime @default(now())
-}
-
-
-Backend REST API Design - 
-
-AUTH
-POST   /api/auth/login
-POST   /api/auth/logout
-POST   /api/auth/refresh
-
-PRODUCTS
-GET    /api/products          (paginated, filter by category, search by SKU/name)
-POST   /api/products          ADMIN, MANAGER
-PUT    /api/products/:id      ADMIN, MANAGER
-DELETE /api/products/:id      ADMIN only
-
-STOCK
-GET    /api/stock/:productId  (history log)
-POST   /api/stock             ADMIN, MANAGER  { type: STOCK_IN/OUT, qty, productId }
-
-VENDORS
-GET    /api/vendors
-POST   /api/vendors           ADMIN
-GET    /api/vendors/:id/purchases
-POST   /api/vendors/:id/purchases   ADMIN, MANAGER
-
-DASHBOARD
-GET    /api/dashboard/stats        ← Redis cached (60s TTL)
-GET    /api/dashboard/low-stock    ← products where quantity <= threshold
-
-
-
-Docker Compose Skeleton - 
-
-services:
-  db:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: ims_db
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: secret
-    ports: ["5432:5432"]
-
-  redis:
-    image: redis:7-alpine
-    ports: ["6379:6379"]
-
-  server:
-    build: ./server
-    depends_on: [db, redis]
-    environment:
-      DATABASE_URL: postgresql://admin:secret@db:5432/ims_db
-      REDIS_URL: redis://redis:6379
-    ports: ["5000:5000"]
-
-  client:
-    build: ./client
-    ports: ["5173:5173"]
-
-
-
-DB - MYSQL
 

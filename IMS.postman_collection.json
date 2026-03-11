@@ -1,0 +1,971 @@
+{
+	"info": {
+		"_postman_id": "a57ad085-f440-40bf-94fa-bd318adc740a",
+		"name": "IMS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "52030462"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2YTJjNTgyLTk3YTMtNDNlOC05YzhkLTE4YzMxNjg1YWM2NCIsImVtYWlsIjoiYWRtaW4yQGFpLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3MzIyMjMyMywiZXhwIjoxNzczMjIzMjIzfQ.esaESGJzi70FX-ZO5znq95wqdBkFzcAbqNM8nDf4J6k",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"id": 0
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"admin2@ai.com\",\r\n  \"password\": \"password\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "text"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localurl}}/api/auth/login",
+					"host": [
+						"{{localurl}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vendor Create",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2YTJjNTgyLTk3YTMtNDNlOC05YzhkLTE4YzMxNjg1YWM2NCIsImVtYWlsIjoiYWRtaW4yQGFpLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3MzIwNzU4MCwiZXhwIjoxNzczMjA4NDgwfQ.rpP7YNpI7jN0458xWY-WCpJlFTSSwiCeADkY6uUlSJA",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"name": "authorization",
+						"sortOrder": 0,
+						"infoTitle": "This header was automatically added",
+						"info": "This header is added because of the authorization method used for this request.\n\nThe value of this header is tentative. You can find the exact value in the console once the request is sent.\n\nUse the authorization tab to remove authorization or to change the value of this header.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to authorization",
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2YTJjNTgyLTk3YTMtNDNlOC05YzhkLTE4YzMxNjg1YWM2NCIsImVtYWlsIjoiYWRtaW4yQGFpLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3MzIwNjUwMSwiZXhwIjoxNzczMjA3NDAxfQ.0QTaLCkeuv6IoLMwXEUUbGQp34G1Yq_nAA7JS_3tBEI",
+						"system": true,
+						"auth": true,
+						"type": "text"
+					},
+					{
+						"name": "cache-control",
+						"sortOrder": 2,
+						"infoTitle": "We recommend using this header",
+						"info": "Postman added \"Cache-Control: no-cache\" as a precautionary measure to prevent the server from returning stale response when one makes repeated requests.\n\nYou can remove this header in the app settings or enter a new one with a different value.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to settings",
+						"key": "Cache-Control",
+						"value": "no-cache",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "postman-token",
+						"sortOrder": 3,
+						"infoTitle": "We recommend using this header",
+						"info": "The Postman-Token header appends a random UUID to every outgoing request. Postman adds this header for API developers to better debug requests sent and to ensure separate requests appear distinct to the receiving server.\n\nYou can remove this header in the app settings.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to settings",
+						"key": "Postman-Token",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "content-type",
+						"sortOrder": 4,
+						"infoTitle": "This header was automatically added",
+						"info": "The Content-Type header is added to help the server identify the media type of the request body that is present in this request.\n\nUse the request body tab to control the value or to remove this header.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to body",
+						"key": "Content-Type",
+						"value": "text/plain",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "content-length",
+						"sortOrder": 5,
+						"infoTitle": "This header was automatically added",
+						"info": "The Content-Length header was added to indicate to the server the size of the request body that is added to this request. Server uses this value to parse the request body accurately.\n\nYou can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to body",
+						"key": "Content-Length",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "host",
+						"sortOrder": 6,
+						"infoTitle": "We recommend using this header",
+						"info": "The Host header is added to identify the domain name for which a request is being sent to the server. This header is implicitly sent by every HTTP client.\n\nYou can remove the header or enter a new one with a different value. It is most likely that without this header, your request will return an HTTP 400 error.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Host",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "user-agent",
+						"sortOrder": 7,
+						"infoTitle": "We recommend using this header",
+						"info": "The User-Agent header is added to help the server identify Postman as the HTTP requesting application or client.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "User-Agent",
+						"value": "PostmanRuntime/7.39.1",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "accept",
+						"sortOrder": 8,
+						"infoTitle": "We recommend using this header",
+						"info": "The \"Accept: */*\" header is added to tell the server that Postman can understand and process all forms of response content types.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Accept",
+						"value": "*/*",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "accept-encoding",
+						"sortOrder": 9,
+						"infoTitle": "We recommend using this header",
+						"info": "The Accept-Encoding header is added to indicate to the server that Postman HTTP client supports a defined list of content-encoding or compression algorithms as response.\n\nYou can remove the header or enter a new one with a different value. Doing that may not accurately render the response within the app.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Accept-Encoding",
+						"value": "gzip, deflate, br",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "connection",
+						"sortOrder": 10,
+						"infoTitle": "We recommend using this header",
+						"info": "Postman added the Connection header to indicate the server to keep the underlying network connection open once the current response is received. This allows Postman to reuse the same connection for faster response times in subsequent requests to the same server.\n\nYou can remove this header or enter a new one with a different value, such as `Connection: Close` to control this behaviour.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Connection",
+						"value": "keep-alive",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"id": 0
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Jindal Steel2\",\r\n  \"email\": \"steel@supply.com\",\r\n  \"phone\": \"+91 91165 43210\",\r\n  \"address\": \"Assam, AS\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "text"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localurl}}/api/vendors",
+					"host": [
+						"{{localurl}}"
+					],
+					"path": [
+						"api",
+						"vendors"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vendors list",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2YTJjNTgyLTk3YTMtNDNlOC05YzhkLTE4YzMxNjg1YWM2NCIsImVtYWlsIjoiYWRtaW4yQGFpLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3MzIwNzY0OSwiZXhwIjoxNzczODEyNDQ5fQ.xsgr64sF4b2t0VOH-OCWcSH7M36UGMO8w9FaV1LdPgQ",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"name": "cache-control",
+						"sortOrder": 2,
+						"infoTitle": "We recommend using this header",
+						"info": "Postman added \"Cache-Control: no-cache\" as a precautionary measure to prevent the server from returning stale response when one makes repeated requests.\n\nYou can remove this header in the app settings or enter a new one with a different value.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to settings",
+						"key": "Cache-Control",
+						"value": "no-cache",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "postman-token",
+						"sortOrder": 3,
+						"infoTitle": "We recommend using this header",
+						"info": "The Postman-Token header appends a random UUID to every outgoing request. Postman adds this header for API developers to better debug requests sent and to ensure separate requests appear distinct to the receiving server.\n\nYou can remove this header in the app settings.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to settings",
+						"key": "Postman-Token",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "host",
+						"sortOrder": 6,
+						"infoTitle": "We recommend using this header",
+						"info": "The Host header is added to identify the domain name for which a request is being sent to the server. This header is implicitly sent by every HTTP client.\n\nYou can remove the header or enter a new one with a different value. It is most likely that without this header, your request will return an HTTP 400 error.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Host",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "user-agent",
+						"sortOrder": 7,
+						"infoTitle": "We recommend using this header",
+						"info": "The User-Agent header is added to help the server identify Postman as the HTTP requesting application or client.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "User-Agent",
+						"value": "PostmanRuntime/7.39.1",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "accept",
+						"sortOrder": 8,
+						"infoTitle": "We recommend using this header",
+						"info": "The \"Accept: */*\" header is added to tell the server that Postman can understand and process all forms of response content types.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Accept",
+						"value": "*/*",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "accept-encoding",
+						"sortOrder": 9,
+						"infoTitle": "We recommend using this header",
+						"info": "The Accept-Encoding header is added to indicate to the server that Postman HTTP client supports a defined list of content-encoding or compression algorithms as response.\n\nYou can remove the header or enter a new one with a different value. Doing that may not accurately render the response within the app.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Accept-Encoding",
+						"value": "gzip, deflate, br",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "connection",
+						"sortOrder": 10,
+						"infoTitle": "We recommend using this header",
+						"info": "Postman added the Connection header to indicate the server to keep the underlying network connection open once the current response is received. This allows Postman to reuse the same connection for faster response times in subsequent requests to the same server.\n\nYou can remove this header or enter a new one with a different value, such as `Connection: Close` to control this behaviour.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Connection",
+						"value": "keep-alive",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"id": 0
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "text"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localurl}}/api/vendors",
+					"host": [
+						"{{localurl}}"
+					],
+					"path": [
+						"api",
+						"vendors"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vendor Purchase",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2YTJjNTgyLTk3YTMtNDNlOC05YzhkLTE4YzMxNjg1YWM2NCIsImVtYWlsIjoiYWRtaW4yQGFpLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3MzIwNzY0OSwiZXhwIjoxNzczODEyNDQ5fQ.xsgr64sF4b2t0VOH-OCWcSH7M36UGMO8w9FaV1LdPgQ",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"name": "authorization",
+						"sortOrder": 0,
+						"infoTitle": "This header was automatically added",
+						"info": "This header is added because of the authorization method used for this request.\n\nThe value of this header is tentative. You can find the exact value in the console once the request is sent.\n\nUse the authorization tab to remove authorization or to change the value of this header.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to authorization",
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2YTJjNTgyLTk3YTMtNDNlOC05YzhkLTE4YzMxNjg1YWM2NCIsImVtYWlsIjoiYWRtaW4yQGFpLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3MzIwNzY0OSwiZXhwIjoxNzczODEyNDQ5fQ.xsgr64sF4b2t0VOH-OCWcSH7M36UGMO8w9FaV1LdPgQ",
+						"system": true,
+						"auth": true,
+						"type": "text"
+					},
+					{
+						"name": "cache-control",
+						"sortOrder": 2,
+						"infoTitle": "We recommend using this header",
+						"info": "Postman added \"Cache-Control: no-cache\" as a precautionary measure to prevent the server from returning stale response when one makes repeated requests.\n\nYou can remove this header in the app settings or enter a new one with a different value.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to settings",
+						"key": "Cache-Control",
+						"value": "no-cache",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "postman-token",
+						"sortOrder": 3,
+						"infoTitle": "We recommend using this header",
+						"info": "The Postman-Token header appends a random UUID to every outgoing request. Postman adds this header for API developers to better debug requests sent and to ensure separate requests appear distinct to the receiving server.\n\nYou can remove this header in the app settings.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to settings",
+						"key": "Postman-Token",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "content-length",
+						"sortOrder": 5,
+						"infoTitle": "This header was automatically added",
+						"info": "The Content-Length header was added to indicate to the server the size of the request body that is added to this request. Server uses this value to parse the request body accurately.\n\nYou can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to body",
+						"key": "Content-Length",
+						"value": "0",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "host",
+						"sortOrder": 6,
+						"infoTitle": "We recommend using this header",
+						"info": "The Host header is added to identify the domain name for which a request is being sent to the server. This header is implicitly sent by every HTTP client.\n\nYou can remove the header or enter a new one with a different value. It is most likely that without this header, your request will return an HTTP 400 error.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Host",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "user-agent",
+						"sortOrder": 7,
+						"infoTitle": "We recommend using this header",
+						"info": "The User-Agent header is added to help the server identify Postman as the HTTP requesting application or client.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "User-Agent",
+						"value": "PostmanRuntime/7.39.1",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "accept",
+						"sortOrder": 8,
+						"infoTitle": "We recommend using this header",
+						"info": "The \"Accept: */*\" header is added to tell the server that Postman can understand and process all forms of response content types.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Accept",
+						"value": "*/*",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "accept-encoding",
+						"sortOrder": 9,
+						"infoTitle": "We recommend using this header",
+						"info": "The Accept-Encoding header is added to indicate to the server that Postman HTTP client supports a defined list of content-encoding or compression algorithms as response.\n\nYou can remove the header or enter a new one with a different value. Doing that may not accurately render the response within the app.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Accept-Encoding",
+						"value": "gzip, deflate, br",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "connection",
+						"sortOrder": 10,
+						"infoTitle": "We recommend using this header",
+						"info": "Postman added the Connection header to indicate the server to keep the underlying network connection open once the current response is received. This allows Postman to reuse the same connection for faster response times in subsequent requests to the same server.\n\nYou can remove this header or enter a new one with a different value, such as `Connection: Close` to control this behaviour.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Connection",
+						"value": "keep-alive",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"key": "content-type",
+						"value": "application/json",
+						"type": "text",
+						"id": 0
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"amount\": 45000,\r\n  \"note\": \"Q1 Electronics order\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "text"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localurl}}/api/vendors/b468d6d5-5897-4cb1-851d-4a2d07b02826/purchases",
+					"host": [
+						"{{localurl}}"
+					],
+					"path": [
+						"api",
+						"vendors",
+						"b468d6d5-5897-4cb1-851d-4a2d07b02826",
+						"purchases"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Product",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2YTJjNTgyLTk3YTMtNDNlOC05YzhkLTE4YzMxNjg1YWM2NCIsImVtYWlsIjoiYWRtaW4yQGFpLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3MzIyNzQzMiwiZXhwIjoxNzczMjI4MzMyfQ.63DA-t7yviKlwDz37FyQ6AgOXU_zHHmqC0VLUUBzxQc",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"name": "authorization",
+						"sortOrder": 0,
+						"infoTitle": "This header was automatically added",
+						"info": "This header is added because of the authorization method used for this request.\n\nThe value of this header is tentative. You can find the exact value in the console once the request is sent.\n\nUse the authorization tab to remove authorization or to change the value of this header.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to authorization",
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2YTJjNTgyLTk3YTMtNDNlOC05YzhkLTE4YzMxNjg1YWM2NCIsImVtYWlsIjoiYWRtaW4yQGFpLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3MzIyMjMyMywiZXhwIjoxNzczMjIzMjIzfQ.esaESGJzi70FX-ZO5znq95wqdBkFzcAbqNM8nDf4J6k",
+						"system": true,
+						"auth": true,
+						"type": "text"
+					},
+					{
+						"name": "cache-control",
+						"sortOrder": 2,
+						"infoTitle": "We recommend using this header",
+						"info": "Postman added \"Cache-Control: no-cache\" as a precautionary measure to prevent the server from returning stale response when one makes repeated requests.\n\nYou can remove this header in the app settings or enter a new one with a different value.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to settings",
+						"key": "Cache-Control",
+						"value": "no-cache",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "postman-token",
+						"sortOrder": 3,
+						"infoTitle": "We recommend using this header",
+						"info": "The Postman-Token header appends a random UUID to every outgoing request. Postman adds this header for API developers to better debug requests sent and to ensure separate requests appear distinct to the receiving server.\n\nYou can remove this header in the app settings.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to settings",
+						"key": "Postman-Token",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "host",
+						"sortOrder": 6,
+						"infoTitle": "We recommend using this header",
+						"info": "The Host header is added to identify the domain name for which a request is being sent to the server. This header is implicitly sent by every HTTP client.\n\nYou can remove the header or enter a new one with a different value. It is most likely that without this header, your request will return an HTTP 400 error.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Host",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "user-agent",
+						"sortOrder": 7,
+						"infoTitle": "We recommend using this header",
+						"info": "The User-Agent header is added to help the server identify Postman as the HTTP requesting application or client.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "User-Agent",
+						"value": "PostmanRuntime/7.39.1",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "accept",
+						"sortOrder": 8,
+						"infoTitle": "We recommend using this header",
+						"info": "The \"Accept: */*\" header is added to tell the server that Postman can understand and process all forms of response content types.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Accept",
+						"value": "*/*",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "accept-encoding",
+						"sortOrder": 9,
+						"infoTitle": "We recommend using this header",
+						"info": "The Accept-Encoding header is added to indicate to the server that Postman HTTP client supports a defined list of content-encoding or compression algorithms as response.\n\nYou can remove the header or enter a new one with a different value. Doing that may not accurately render the response within the app.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Accept-Encoding",
+						"value": "gzip, deflate, br",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "connection",
+						"sortOrder": 10,
+						"infoTitle": "We recommend using this header",
+						"info": "Postman added the Connection header to indicate the server to keep the underlying network connection open once the current response is received. This allows Postman to reuse the same connection for faster response times in subsequent requests to the same server.\n\nYou can remove this header or enter a new one with a different value, such as `Connection: Close` to control this behaviour.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Connection",
+						"value": "keep-alive",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"key": "Content-type",
+						"value": "application/json",
+						"type": "text",
+						"id": 0
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Kreo Swarm\",\r\n  \"sku\": \"WM-00122\",\r\n  \"quantity\": 50,\r\n  \"threshold\": 10,\r\n  \"vendorId\": \"e174ebdb-5c3e-4368-993e-d4e35f1cdde6\",\r\n  \"price\": 5000.00,\r\n  \"description\": \"Ergonomic wireless keyboard\",\r\n  \"supplierName\": \"Aramco\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "text"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localurl}}/api/products",
+					"host": [
+						"{{localurl}}"
+					],
+					"path": [
+						"api",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Stock Entry",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2YTJjNTgyLTk3YTMtNDNlOC05YzhkLTE4YzMxNjg1YWM2NCIsImVtYWlsIjoiYWRtaW4yQGFpLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3MzI0NTIzNiwiZXhwIjoxNzczMjQ2MTM2fQ.eWf2mUBYqY1OcqQuHFuad-TmfL8gnd8b5Vj0qlxFrs4",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"name": "authorization",
+						"sortOrder": 0,
+						"infoTitle": "This header was automatically added",
+						"info": "This header is added because of the authorization method used for this request.\n\nThe value of this header is tentative. You can find the exact value in the console once the request is sent.\n\nUse the authorization tab to remove authorization or to change the value of this header.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to authorization",
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2YTJjNTgyLTk3YTMtNDNlOC05YzhkLTE4YzMxNjg1YWM2NCIsImVtYWlsIjoiYWRtaW4yQGFpLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3MzI0NTIzNiwiZXhwIjoxNzczMjQ2MTM2fQ.eWf2mUBYqY1OcqQuHFuad-TmfL8gnd8b5Vj0qlxFrs4",
+						"system": true,
+						"auth": true,
+						"type": "text"
+					},
+					{
+						"name": "cache-control",
+						"sortOrder": 2,
+						"infoTitle": "We recommend using this header",
+						"info": "Postman added \"Cache-Control: no-cache\" as a precautionary measure to prevent the server from returning stale response when one makes repeated requests.\n\nYou can remove this header in the app settings or enter a new one with a different value.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to settings",
+						"key": "Cache-Control",
+						"value": "no-cache",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "postman-token",
+						"sortOrder": 3,
+						"infoTitle": "We recommend using this header",
+						"info": "The Postman-Token header appends a random UUID to every outgoing request. Postman adds this header for API developers to better debug requests sent and to ensure separate requests appear distinct to the receiving server.\n\nYou can remove this header in the app settings.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to settings",
+						"key": "Postman-Token",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "content-type",
+						"sortOrder": 4,
+						"infoTitle": "This header was automatically added",
+						"info": "The Content-Type header is added to help the server identify the media type of the request body that is present in this request.\n\nUse the request body tab to control the value or to remove this header.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to body",
+						"key": "Content-Type",
+						"value": "text/plain",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "content-length",
+						"sortOrder": 5,
+						"infoTitle": "This header was automatically added",
+						"info": "The Content-Length header was added to indicate to the server the size of the request body that is added to this request. Server uses this value to parse the request body accurately.\n\nYou can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to body",
+						"key": "Content-Length",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "host",
+						"sortOrder": 6,
+						"infoTitle": "We recommend using this header",
+						"info": "The Host header is added to identify the domain name for which a request is being sent to the server. This header is implicitly sent by every HTTP client.\n\nYou can remove the header or enter a new one with a different value. It is most likely that without this header, your request will return an HTTP 400 error.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Host",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "user-agent",
+						"sortOrder": 7,
+						"infoTitle": "We recommend using this header",
+						"info": "The User-Agent header is added to help the server identify Postman as the HTTP requesting application or client.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "User-Agent",
+						"value": "PostmanRuntime/7.39.1",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "accept",
+						"sortOrder": 8,
+						"infoTitle": "We recommend using this header",
+						"info": "The \"Accept: */*\" header is added to tell the server that Postman can understand and process all forms of response content types.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Accept",
+						"value": "*/*",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "accept-encoding",
+						"sortOrder": 9,
+						"infoTitle": "We recommend using this header",
+						"info": "The Accept-Encoding header is added to indicate to the server that Postman HTTP client supports a defined list of content-encoding or compression algorithms as response.\n\nYou can remove the header or enter a new one with a different value. Doing that may not accurately render the response within the app.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Accept-Encoding",
+						"value": "gzip, deflate, br",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "connection",
+						"sortOrder": 10,
+						"infoTitle": "We recommend using this header",
+						"info": "Postman added the Connection header to indicate the server to keep the underlying network connection open once the current response is received. This allows Postman to reuse the same connection for faster response times in subsequent requests to the same server.\n\nYou can remove this header or enter a new one with a different value, such as `Connection: Close` to control this behaviour.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Connection",
+						"value": "keep-alive",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"key": "Content-type",
+						"value": "application/json",
+						"type": "text",
+						"id": 0
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"productId\": \"20ddcd95-59ac-4af2-af7f-2a14439f4f7c\",\r\n  \"type\": \"STOCK_IN\",\r\n  \"quantity\": 20,\r\n  \"note\": \"Monthly restock\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "text"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localurl}}/api/stock",
+					"host": [
+						"{{localurl}}"
+					],
+					"path": [
+						"api",
+						"stock"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Stock List",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2YTJjNTgyLTk3YTMtNDNlOC05YzhkLTE4YzMxNjg1YWM2NCIsImVtYWlsIjoiYWRtaW4yQGFpLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3MzI0NjM5NiwiZXhwIjoxNzczMjQ3Mjk2fQ.tTiX_Ky5MVRUM-WipdJfS7IsvMLNX8VAOGwWOMrKGt0",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"name": "cache-control",
+						"sortOrder": 2,
+						"infoTitle": "We recommend using this header",
+						"info": "Postman added \"Cache-Control: no-cache\" as a precautionary measure to prevent the server from returning stale response when one makes repeated requests.\n\nYou can remove this header in the app settings or enter a new one with a different value.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to settings",
+						"key": "Cache-Control",
+						"value": "no-cache",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "postman-token",
+						"sortOrder": 3,
+						"infoTitle": "We recommend using this header",
+						"info": "The Postman-Token header appends a random UUID to every outgoing request. Postman adds this header for API developers to better debug requests sent and to ensure separate requests appear distinct to the receiving server.\n\nYou can remove this header in the app settings.",
+						"allowedToToggle": false,
+						"disableEdit": true,
+						"previewSettingsLink": "Go to settings",
+						"key": "Postman-Token",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "host",
+						"sortOrder": 6,
+						"infoTitle": "We recommend using this header",
+						"info": "The Host header is added to identify the domain name for which a request is being sent to the server. This header is implicitly sent by every HTTP client.\n\nYou can remove the header or enter a new one with a different value. It is most likely that without this header, your request will return an HTTP 400 error.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Host",
+						"value": "<calculated when request is sent>",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "user-agent",
+						"sortOrder": 7,
+						"infoTitle": "We recommend using this header",
+						"info": "The User-Agent header is added to help the server identify Postman as the HTTP requesting application or client.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "User-Agent",
+						"value": "PostmanRuntime/7.39.1",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "accept",
+						"sortOrder": 8,
+						"infoTitle": "We recommend using this header",
+						"info": "The \"Accept: */*\" header is added to tell the server that Postman can understand and process all forms of response content types.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Accept",
+						"value": "*/*",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "accept-encoding",
+						"sortOrder": 9,
+						"infoTitle": "We recommend using this header",
+						"info": "The Accept-Encoding header is added to indicate to the server that Postman HTTP client supports a defined list of content-encoding or compression algorithms as response.\n\nYou can remove the header or enter a new one with a different value. Doing that may not accurately render the response within the app.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Accept-Encoding",
+						"value": "gzip, deflate, br",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"name": "connection",
+						"sortOrder": 10,
+						"infoTitle": "We recommend using this header",
+						"info": "Postman added the Connection header to indicate the server to keep the underlying network connection open once the current response is received. This allows Postman to reuse the same connection for faster response times in subsequent requests to the same server.\n\nYou can remove this header or enter a new one with a different value, such as `Connection: Close` to control this behaviour.",
+						"allowedToToggle": true,
+						"disableEdit": true,
+						"key": "Connection",
+						"value": "keep-alive",
+						"system": true,
+						"type": "text"
+					},
+					{
+						"key": "Content-type",
+						"value": "application/json",
+						"type": "text",
+						"id": 0
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "text"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localurl}}/api/stock",
+					"host": [
+						"{{localurl}}"
+					],
+					"path": [
+						"api",
+						"stock"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "localurl",
+			"value": "http://localhost:5000",
+			"type": "string"
+		}
+	]
+}

@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
-import { useAppSelector } from "@/app/hooks";
-import { mockCategories } from "@/mock/mockData";
+import { useAppSelector, useAppDispatch } from "@/app/hooks";
+import { mockCategories, mockProducts } from "@/mock/mockData";
+import { fetchProducts, setProducts } from "@/store/productsSlice";
+import type { Product } from "@/store/productsSlice";
+
+import api from "@/services/axiosInstance";
+
 import {
   Package,
   AlertTriangle,
@@ -85,10 +90,22 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 /* ── Main Page ───────────────────────────────── */
 const DashboardPage = () => {
+  const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
   const products = useAppSelector((s) => s.products.items);
-  const entries = useAppSelector((s) => s.stock.entries);
   const vendors = useAppSelector((s) => s.vendors.vendors);
+
+  const token = useAppSelector((s) => s.auth.token);
+  const isRealUser = !!token;
+  const [apiEntries, setApiEntries] = useState<any[]>([]);
+
+  const [apiVendorCount, setApiVendorCount] = useState(0);
+
+  const vendorCount = isRealUser ? apiVendorCount : vendors.length;
+
+  const mockEntries = useAppSelector((s) => s.stock.entries);
+
+  const entries = isRealUser ? apiEntries : mockEntries;
 
   const [showToast, setShowToast] = useState(false);
 
@@ -97,6 +114,26 @@ const DashboardPage = () => {
   const getCat = (id: string) =>
     mockCategories.find((c) => c.id === id)?.name ?? id;
   const getProd = (id: string) => products.find((p) => p.id === id);
+
+  useEffect(() => {
+    // Reset local state first on every switch
+    setApiEntries([]);
+    setApiVendorCount(0);
+
+    if (isRealUser) {
+      dispatch(fetchProducts());
+      api
+        .get("/stock")
+        .then((res) => setApiEntries(res.data))
+        .catch(() => {});
+      api
+        .get("/vendors")
+        .then((res) => setApiVendorCount(res.data.data?.length ?? 0))
+        .catch(() => {});
+    } else {
+      dispatch(setProducts(mockProducts as Product[]));
+    }
+  }, [isRealUser, dispatch]);
 
   // Show toast once on mount if there are low stock items
   useEffect(() => {
@@ -154,7 +191,7 @@ const DashboardPage = () => {
     },
     {
       label: "Total Vendors",
-      value: vendors.length,
+      value: vendorCount,
       icon: Truck,
       color: "#f5c573",
     },
@@ -252,7 +289,7 @@ const DashboardPage = () => {
         </div>
 
         {/* Products by Category bar chart */}
-        <div
+        {/* <div
           className="rounded-xl p-4 md:p-5"
           style={{ background: "#1e1e1e", border: "1px solid #242424" }}
         >
@@ -286,7 +323,7 @@ const DashboardPage = () => {
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </div> */}
       </div>
 
       {/* Low Stock + Recent Activity */}
@@ -328,7 +365,7 @@ const DashboardPage = () => {
                       {p.name}
                     </p>
                     <p className="text-xs" style={{ color: "#888" }}>
-                      {p.sku} · {getCat(p.categoryId)}
+                      {/* {p.sku} · {getCat(p.categoryId)} */}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
@@ -347,7 +384,6 @@ const DashboardPage = () => {
             </div>
           )}
         </div>
-
         {/* Recent Activity */}
         <div
           className="rounded-xl p-4 md:p-5"
@@ -357,53 +393,69 @@ const DashboardPage = () => {
             Recent Activity
           </h2>
           <div className="flex flex-col gap-2">
-            {entries.slice(0, 6).map((e) => {
-              const prod = getProd(e.productId);
-              const isIn = e.type === "STOCK_IN";
-              return (
-                <div
-                  key={e.id}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-lg"
-                  style={{ background: "#242424" }}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ background: isIn ? "#10b98120" : "#e2481520" }}
-                    >
-                      {isIn ? (
-                        <TrendingUp size={12} style={{ color: "#10b981" }} />
-                      ) : (
-                        <TrendingDown size={12} style={{ color: "#e24815" }} />
-                      )}
+            {entries.length === 0 ? (
+              <p className="text-sm text-center mt-4" style={{ color: "#555" }}>
+                No recent activity
+              </p>
+            ) : (
+              entries.slice(0, 6).map((e) => {
+                const prodName =
+                  (e as any).product?.name ??
+                  getProd(e.productId)?.name ??
+                  e.productId;
+                const isIn = e.type === "STOCK_IN";
+                return (
+                  <div
+                    key={e.id}
+                    className="flex items-center justify-between px-3 py-2.5 rounded-lg"
+                    style={{ background: "#242424" }}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ background: isIn ? "#10b98120" : "#e2481520" }}
+                      >
+                        {isIn ? (
+                          <TrendingUp size={12} style={{ color: "#10b981" }} />
+                        ) : (
+                          <TrendingDown
+                            size={12}
+                            style={{ color: "#e24815" }}
+                          />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm text-white truncate">
+                          {prodName}
+                        </p>{" "}
+                        {/* ← */}
+                        <p
+                          className="text-xs truncate"
+                          style={{ color: "#555" }}
+                        >
+                          {e.note || "—"}
+                        </p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm text-white truncate">
-                        {prod?.name ?? e.productId}
+                    <div className="text-right shrink-0 ml-2">
+                      <p
+                        className="text-sm font-semibold"
+                        style={{ color: isIn ? "#10b981" : "#e24815" }}
+                      >
+                        {isIn ? "+" : "-"}
+                        {e.quantity}
                       </p>
-                      <p className="text-xs truncate" style={{ color: "#555" }}>
-                        {e.note}
+                      <p className="text-xs" style={{ color: "#444" }}>
+                        {new Date(e.createdAt).toLocaleDateString("en-IN", {
+                          day: "2-digit",
+                          month: "short",
+                        })}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right shrink-0 ml-2">
-                    <p
-                      className="text-sm font-semibold"
-                      style={{ color: isIn ? "#10b981" : "#e24815" }}
-                    >
-                      {isIn ? "+" : "-"}
-                      {e.quantity}
-                    </p>
-                    <p className="text-xs" style={{ color: "#444" }}>
-                      {new Date(e.createdAt).toLocaleDateString("en-IN", {
-                        day: "2-digit",
-                        month: "short",
-                      })}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
       </div>

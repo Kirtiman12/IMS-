@@ -10,7 +10,7 @@ export const getAll = async (req: Request, res: Response) => {
 };
 
 export const getById = async (req: Request, res: Response) => {
-  const product = await ProductService.getProductById(req.params.id);
+  const product = await ProductService.getProductById(req.params.id as string); 
   if (!product) { res.status(404).json({ message: "Product not found" }); return; }
   res.json(product);
 };
@@ -21,11 +21,11 @@ export const create = async (req: Request, res: Response) => {
 };
 
 export const update = async (req: Request, res: Response) => {
-  const product = await ProductService.updateProduct(req.params.id, req.body);
+  const product = await ProductService.updateProduct(req.params.id as string, req.body); 
   res.json(product);
 };
 
 export const remove = async (req: Request, res: Response) => {
-  await ProductService.deleteProduct(req.params.id);
+  await ProductService.deleteProduct(req.params.id as string); 
   res.status(204).send();
 };

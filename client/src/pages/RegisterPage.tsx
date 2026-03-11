@@ -5,6 +5,7 @@ import { loginSuccess } from "@/store/authSlice";
 import useClickEffect from "@/hooks/useClickEffect";
 import { BoxIcon, Eye, EyeOff } from "lucide-react";
 import type { Role } from "@/mock/mockData";
+import api from "@/services/axiosInstance";
 
 const RegisterPage = () => {
   const dispatch = useAppDispatch();
@@ -18,6 +19,8 @@ const RegisterPage = () => {
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [apiError, setApiError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const { clickClass, handleClick } = useClickEffect("click-press");
 
@@ -32,7 +35,7 @@ const RegisterPage = () => {
     return e;
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     handleClick();
     const e = validate();
     if (Object.keys(e).length > 0) {
@@ -40,18 +43,30 @@ const RegisterPage = () => {
       return;
     }
     setErrors({});
+    setApiError("");
+    setLoading(true);
 
-    // For now registers locally and logs in immediately
-    // Replace with API call when backend is connected
-    dispatch(
-      loginSuccess({
-        id: `u_${Date.now()}`,
+    try {
+      const res = await api.post("/auth/register", {
         name: name.trim(),
         email: email.trim(),
+        password,
         role,
-      }),
-    );
-    navigate("/dashboard");
+      });
+      dispatch(
+        loginSuccess({
+          user: res.data.user,
+          token: res.data.accessToken,
+        }),
+      );
+      navigate("/dashboard");
+    } catch (err: any) {
+      setApiError(
+        err.response?.data?.message ?? "Registration failed. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const Field = ({
@@ -71,9 +86,9 @@ const RegisterPage = () => {
     placeholder?: string;
     rightSlot?: React.ReactNode;
   }) => (
-    <div>
+    <div className="mb-4">
       <label
-        className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
+        className="text-xs font-medium uppercase tracking-wider mb-2 block"
         style={{ color: "#888" }}
       >
         {label}
@@ -97,21 +112,17 @@ const RegisterPage = () => {
           </div>
         )}
       </div>
-      {error && (
-        <p className="text-xs mt-1" style={{ color: "#e24815" }}>
-          {error}
-        </p>
-      )}
+      {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
     </div>
   );
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
+      className="min-h-screen flex items-center justify-center scale-[0.85] md:scale-[1]"
       style={{ background: "#191818" }}
     >
       <div
-        className="w-full max-w-md py-8 px-8 rounded-2xl"
+        className="w-full max-w-md p-8 rounded-2xl"
         style={{ background: "#1e1e1e", border: "1px solid #2a2a2a" }}
       >
         {/* Brand */}
@@ -135,95 +146,97 @@ const RegisterPage = () => {
           Fill in your details to get started
         </p>
 
-        <div className="flex flex-col gap-4">
-          {/* Full Name */}
-          <Field
-            label="Full Name"
-            value={name}
-            onChange={setName}
-            placeholder="e.g. John Doe"
-            error={errors.name}
-          />
+        {/* Full Name */}
+        <Field
+          label="Full Name"
+          value={name}
+          onChange={setName}
+          placeholder="John Doe"
+          error={errors.name}
+        />
 
-          {/* Email */}
-          <Field
-            label="Email"
-            value={email}
-            onChange={setEmail}
-            type="email"
-            placeholder="you@example.com"
-            error={errors.email}
-          />
+        {/* Email */}
+        <Field
+          label="Email"
+          value={email}
+          onChange={setEmail}
+          type="email"
+          placeholder="you@example.com"
+          error={errors.email}
+        />
 
-          {/* Password */}
-          <Field
-            label="Password"
-            value={password}
-            onChange={setPassword}
-            type={showPass ? "text" : "password"}
-            placeholder="Min. 6 characters"
-            error={errors.password}
-            rightSlot={
-              <button
-                onClick={() => setShowPass(!showPass)}
-                style={{ color: "#666" }}
-              >
-                {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            }
-          />
-
-          {/* Confirm Password */}
-          <Field
-            label="Confirm Password"
-            value={confirm}
-            onChange={setConfirm}
-            type={showConfirm ? "text" : "password"}
-            placeholder="Re-enter your password"
-            error={errors.confirm}
-            rightSlot={
-              <button
-                onClick={() => setShowConfirm(!showConfirm)}
-                style={{ color: "#666" }}
-              >
-                {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            }
-          />
-
-          {/* Role */}
-          <div>
-            <label
-              className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
-              style={{ color: "#888" }}
+        {/* Password */}
+        <Field
+          label="Password"
+          value={password}
+          onChange={setPassword}
+          type={showPass ? "text" : "password"}
+          placeholder="Min. 6 characters"
+          error={errors.password}
+          rightSlot={
+            <button
+              onClick={() => setShowPass(!showPass)}
+              style={{ color: "#666" }}
             >
-              Role
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {(["ADMIN", "MANAGER", "VIEWER"] as Role[]).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setRole(r)}
-                  className="py-2 rounded-lg text-sm font-medium transition-all"
-                  style={{
-                    background: role === r ? "#e24815" : "#2a2a2a",
-                    color: role === r ? "white" : "#888",
-                    border: `1px solid ${role === r ? "#e24815" : "#333"}`,
-                  }}
-                >
-                  {r.charAt(0) + r.slice(1).toLowerCase()}
-                </button>
-              ))}
-            </div>
+              {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          }
+        />
+
+        {/* Confirm Password */}
+        <Field
+          label="Confirm Password"
+          value={confirm}
+          onChange={setConfirm}
+          type={showConfirm ? "text" : "password"}
+          placeholder="Re-enter password"
+          error={errors.confirm}
+          rightSlot={
+            <button
+              onClick={() => setShowConfirm(!showConfirm)}
+              style={{ color: "#666" }}
+            >
+              {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          }
+        />
+
+        {/* Role */}
+        <div className="mb-6">
+          <label
+            className="text-xs font-medium uppercase tracking-wider mb-2 block"
+            style={{ color: "#888" }}
+          >
+            Role
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {(["ADMIN", "MANAGER", "VIEWER"] as Role[]).map((r) => (
+              <button
+                key={r}
+                onClick={() => setRole(r)}
+                className="py-2 rounded-lg text-sm font-medium transition-all"
+                style={{
+                  background: role === r ? "#e24815" : "#2a2a2a",
+                  color: role === r ? "white" : "#888",
+                  border: `1px solid ${role === r ? "#e24815" : "#333"}`,
+                }}
+              >
+                {r.charAt(0) + r.slice(1).toLowerCase()}
+              </button>
+            ))}
           </div>
         </div>
 
+        {/* API error */}
+        {apiError && <p className="text-red-400 text-sm mb-4">{apiError}</p>}
+
         <button
           onClick={handleRegister}
-          className={`w-full py-3 rounded-lg font-semibold text-white text-sm mt-6 ${clickClass}`}
+          disabled={loading}
+          className={`w-full py-3 rounded-lg font-semibold text-white text-sm ${clickClass} disabled:opacity-50 disabled:cursor-not-allowed`}
           style={{ background: "#e24815" }}
         >
-          Create Account
+          {loading ? "Creating account..." : "Create Account"}
         </button>
 
         <p className="text-center text-sm mt-5" style={{ color: "#555" }}>

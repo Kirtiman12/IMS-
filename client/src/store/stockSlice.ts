@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { mockStockEntries } from "@/mock/mockData";
+import { logout } from "./authSlice";
 
 export interface StockEntry {
   id: string; productId: string;
@@ -19,6 +20,11 @@ const stockSlice = createSlice({
         createdAt: new Date().toISOString(),
       });
     },
+  },
+    extraReducers: (builder) => {
+    builder.addCase(logout, (state) => {
+      state.entries = mockStockEntries as StockEntry[];
+    });
   },
 });
 

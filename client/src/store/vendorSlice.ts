@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { mockVendors, mockPurchaseEntries } from "@/mock/mockData";
+import { logout } from "./authSlice"; 
 
 export interface Vendor {
   id: string; name: string; email: string; phone: string; address: string;
@@ -21,6 +22,12 @@ const vendorsSlice = createSlice({
     addPurchaseEntry(state, { payload }: PayloadAction<Omit<PurchaseEntry, "id" | "createdAt">>) {
       state.purchases.unshift({ ...payload, id: `pe${Date.now()}`, createdAt: new Date().toISOString() });
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(logout, (state) => {
+      state.vendors   = mockVendors as Vendor[];
+      state.purchases = mockPurchaseEntries as PurchaseEntry[];
+    });
   },
 });
 

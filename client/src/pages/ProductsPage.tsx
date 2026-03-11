@@ -1,12 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { mockProducts } from "@/mock/mockData";
+import api from "@/services/axiosInstance";
+
 import {
   addProduct,
   updateProduct,
   deleteProduct,
+  setProducts,
+  fetchProducts,
+  createProductThunk,
+  updateProductThunk,
+  deleteProductThunk,
   type Product,
 } from "@/store/productsSlice";
+
 import { mockCategories, mockVendors } from "@/mock/mockData";
 import useClickEffect from "@/hooks/useClickEffect";
 import { Plus, Pencil, Trash2, Search, X, Package, Eye } from "lucide-react";
@@ -28,6 +37,11 @@ const ProductsPage = () => {
   const navigate = useNavigate();
   const products = useAppSelector((s) => s.products.items);
   const userRole = useAppSelector((s) => s.auth.user?.role);
+  const loading = useAppSelector((s) => s.products.loading);
+  const saving = useAppSelector((s) => s.products.saving);
+  const apiReady = useAppSelector((s) => s.products.apiReady);
+  const token = useAppSelector((s) => s.auth.token);
+  const isRealUser = !!token;
 
   const [search, setSearch] = useState("");
   const [catFilter, setCat] = useState("all");
@@ -37,6 +51,22 @@ const ProductsPage = () => {
   const [form, setForm] = useState<Omit<Product, "id">>(EMPTY);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  const allCategories = mockCategories;
+
+  const [dbVendors, setDbVendors] = useState<{ id: string; name: string }[]>(
+    [],
+  );
+
+  useEffect(() => {
+    if (!isRealUser) return; // demo users use mockVendors fallback already
+    api
+      .get("/vendors")
+      .then((res) => setDbVendors(res.data.data))
+      .catch(() => {});
+  }, [isRealUser]);
+
+  const allVendors = dbVendors.length > 0 ? dbVendors : mockVendors;
+
   const { clickClass: addCls, handleClick: addClick } =
     useClickEffect("click-press");
   const { clickClass: saveCls, handleClick: saveClick } =
@@ -44,10 +74,15 @@ const ProductsPage = () => {
   const { clickClass: delCls, handleClick: delClick } =
     useClickEffect("click-press");
 
-  const getCat = (id: string) =>
-    mockCategories.find((c) => c.id === id)?.name ?? id;
-  const getVen = (id: string | null) =>
-    mockVendors.find((v) => v.id === id)?.name ?? "—";
+  const isMock = (id: string) => /^p\d+$/.test(id);
+
+  const getCat = (p: Product) =>
+    p.category?.name ??
+    mockCategories.find((c) => c.id === p.categoryId)?.name ??
+    p.categoryId;
+  const getVen = (p: Product) =>
+    p.vendor?.name ?? mockVendors.find((v) => v.id === p.vendorId)?.name ?? "—";
+
   const canEdit = userRole === "ADMIN" || userRole === "MANAGER";
   const canDelete = userRole === "ADMIN";
 
@@ -70,7 +105,11 @@ const ProductsPage = () => {
   const openAdd = () => {
     addClick();
     setEditing(null);
-    setForm(EMPTY);
+    setForm({
+      ...EMPTY,
+      categoryId: allCategories[0]?.id ?? "",
+      vendorId: allVendors[0]?.id ?? "",
+    });
     setShow(true);
   };
 
@@ -90,19 +129,60 @@ const ProductsPage = () => {
     setShow(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     saveClick();
-    editing
-      ? dispatch(updateProduct({ ...form, id: editing.id }))
-      : dispatch(addProduct(form));
-    setShow(false);
+    if (editing && isMock(editing.id)) {
+      dispatch(updateProduct({ ...form, id: editing.id }));
+      setShow(false);
+      return;
+    }
+
+    // Strip categoryId — it's optional in DB and mock IDs will cause FK error
+    const { categoryId, ...apiForm } = form;
+
+    try {
+      if (editing) {
+        await dispatch(
+          updateProductThunk({ ...apiForm, id: editing.id }),
+        ).unwrap();
+      } else {
+        await dispatch(createProductThunk(apiForm)).unwrap();
+      }
+      setShow(false);
+    } catch {
+      if (!apiReady) {
+        editing
+          ? dispatch(updateProduct({ ...form, id: editing.id }))
+          : dispatch(addProduct(form));
+        setShow(false);
+      }
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     delClick();
-    if (deleteId) dispatch(deleteProduct(deleteId));
+    if (!deleteId) return;
+    if (isMock(deleteId)) {
+      dispatch(deleteProduct(deleteId));
+      setDeleteId(null);
+      return;
+    }
+    try {
+      await dispatch(deleteProductThunk(deleteId)).unwrap();
+    } catch {
+      if (!apiReady) dispatch(deleteProduct(deleteId));
+    }
     setDeleteId(null);
   };
+
+  // fetch products
+  useEffect(() => {
+    if (isRealUser) {
+      dispatch(fetchProducts());
+    } else {
+      dispatch(setProducts(mockProducts as Product[]));
+    }
+  }, [isRealUser, dispatch]);
 
   return (
     <div className="p-4 md:p-6">
@@ -150,7 +230,7 @@ const ProductsPage = () => {
           style={{ background: "#1e1e1e", border: "1px solid #2a2a2a" }}
         >
           <option value="all">All Categories</option>
-          {mockCategories.map((c) => (
+          {allCategories.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
             </option>
@@ -224,12 +304,12 @@ const ProductsPage = () => {
                       className="px-2 py-0.5 rounded text-xs"
                       style={{ background: "#2a2a2a", color: "#aaa" }}
                     >
-                      {getCat(p.categoryId)}
+                      {getCat(p)}
                     </span>
                   </td>
                   <td className="px-4 py-3" style={{ color: "#aaa" }}>
                     {p.price != null && p.price > 0
-                      ? `₹${p.price.toFixed(2)}`
+                      ? `₹${Number(p.price).toFixed(2)}`
                       : "—"}
                   </td>
                   <td className="px-4 py-3">
@@ -252,7 +332,7 @@ const ProductsPage = () => {
                     {p.threshold}
                   </td>
                   <td className="px-4 py-3" style={{ color: "#888" }}>
-                    {p.supplierName || getVen(p.vendorId)}
+                    {p.supplierName || getVen(p)}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -366,17 +446,18 @@ const ProductsPage = () => {
                 </div>
 
                 {/* Card fields */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="gap-4 flex-col flex">
                   {[
-                    { label: "Category", value: getCat(p.categoryId) },
                     {
                       label: "Price",
                       value:
-                        p.price && p.price > 0 ? `₹${p.price.toFixed(2)}` : "—",
+                        p.price && Number(p.price) > 0
+                          ? `₹${Number(p.price).toFixed(2)}`
+                          : "—",
                     },
                     {
                       label: "Supplier",
-                      value: p.supplierName || getVen(p.vendorId),
+                      value: p.supplierName || getVen(p),
                     },
                     { label: "Threshold", value: String(p.threshold) },
                   ].map(({ label, value }) => (
@@ -394,7 +475,7 @@ const ProductsPage = () => {
                 </div>
 
                 {/* Quantity */}
-                <div className="mt-2 flex items-center justify-between">
+                <div className="mt-6 flex items-center justify-between">
                   <span className="text-xs" style={{ color: "#555" }}>
                     Quantity
                   </span>
@@ -499,7 +580,7 @@ const ProductsPage = () => {
                   className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none"
                   style={{ background: "#2a2a2a", border: "1px solid #333" }}
                 >
-                  {mockCategories.map((c) => (
+                  {allCategories.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
                     </option>
@@ -625,7 +706,7 @@ const ProductsPage = () => {
                   style={{ background: "#2a2a2a", border: "1px solid #333" }}
                 >
                   <option value="">No vendor</option>
-                  {mockVendors.map((v) => (
+                  {allVendors.map((v) => (
                     <option key={v.id} value={v.id}>
                       {v.name}
                     </option>

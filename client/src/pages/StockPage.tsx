@@ -1,48 +1,114 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { addStockEntry } from "../store/stockSlice";
-import { adjustQuantity } from "@/store/productsSlice";
+import {
+  adjustQuantity,
+  fetchProducts,
+  setProducts,
+  Product,
+} from "@/store/productsSlice";
+import { mockProducts } from "@/mock/mockData";
 import useClickEffect from "@/hooks/useClickEffect";
 import { TrendingUp, TrendingDown } from "lucide-react";
+import api from "@/services/axiosInstance";
 
 const StockPage = () => {
   const dispatch = useAppDispatch();
   const products = useAppSelector((s) => s.products.items);
-  const entries = useAppSelector((s) => s.stock.entries);
+  const mockEntries = useAppSelector((s) => s.stock.entries);
+  const token = useAppSelector((s) => s.auth.token);
+  const isRealUser = !!token;
   const userRole = useAppSelector((s) => s.auth.user?.role);
   const userName = useAppSelector((s) => s.auth.user?.name ?? "Unknown");
 
+  const [apiEntries, setApiEntries] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [productsLoaded, setProductsLoaded] = useState(!isRealUser);
+  const [productId, setProduct] = useState("");
   const [tab, setTab] = useState<"STOCK_IN" | "STOCK_OUT">("STOCK_IN");
-  const [productId, setProduct] = useState(products[0]?.id ?? "");
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Single consolidated effect — resets + reloads on every user switch
+  useEffect(() => {
+    setApiEntries([]);
+    setProductsLoaded(!isRealUser);
+    setProduct("");
+
+    if (isRealUser) {
+      setLoadingHistory(true);
+      api
+        .get("/stock")
+        .then((res) => setApiEntries(res.data))
+        .catch(() => {})
+        .finally(() => setLoadingHistory(false));
+      dispatch(fetchProducts()).then(() => setProductsLoaded(true));
+    } else {
+      dispatch(setProducts(mockProducts as Product[])); // ← load mock products for demo
+    }
+  }, [isRealUser, dispatch]);
+
+  const productList = isRealUser ? (productsLoaded ? products : []) : products;
+
+  useEffect(() => {
+    if (productList.length > 0 && !productId) {
+      setProduct(productList[0].id);
+    }
+  }, [productList]);
+
+  const entries = isRealUser ? apiEntries : mockEntries;
 
   const { clickClass, handleClick } = useClickEffect("click-press");
   const canEdit = userRole === "ADMIN" || userRole === "MANAGER";
   const getProd = (id: string) => products.find((p) => p.id === id);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     handleClick();
     if (!productId || quantity <= 0) return;
-    dispatch(
-      addStockEntry({
-        productId,
-        type: tab,
-        quantity,
-        note,
-        performedBy: userName,
-      }),
-    );
-    dispatch(
-      adjustQuantity({
-        productId,
-        delta: tab === "STOCK_IN" ? quantity : -quantity,
-      }),
-    );
-    setSuccess(
-      `${tab === "STOCK_IN" ? "Stocked in" : "Stocked out"} ${quantity} units.`,
-    );
+
+    if (isRealUser) {
+      try {
+        const res = await api.post("/stock", {
+          productId,
+          type: tab,
+          quantity,
+          note,
+        });
+        setApiEntries((prev) => [res.data, ...prev]);
+        dispatch(
+          adjustQuantity({
+            productId,
+            delta: tab === "STOCK_IN" ? quantity : -quantity,
+          }),
+        );
+        setSuccess(
+          `${tab === "STOCK_IN" ? "Stocked in" : "Stocked out"} ${quantity} units.`,
+        );
+      } catch {
+        setSuccess("Failed to save. Try again.");
+      }
+    } else {
+      dispatch(
+        addStockEntry({
+          productId,
+          type: tab,
+          quantity,
+          note,
+          performedBy: userName,
+        }),
+      );
+      dispatch(
+        adjustQuantity({
+          productId,
+          delta: tab === "STOCK_IN" ? quantity : -quantity,
+        }),
+      );
+      setSuccess(
+        `${tab === "STOCK_IN" ? "Stocked in" : "Stocked out"} ${quantity} units.`,
+      );
+    }
+
     setNote("");
     setQuantity(1);
     setTimeout(() => setSuccess(""), 3000);
@@ -104,8 +170,12 @@ const StockPage = () => {
                 onChange={(e) => setProduct(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-lg text-white text-sm outline-none"
                 style={{ background: "#2a2a2a", border: "1px solid #333" }}
+                disabled={isRealUser && !productsLoaded}
               >
-                {products.map((p) => (
+                {isRealUser && !productsLoaded && (
+                  <option value="">Loading products...</option>
+                )}
+                {productList.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name} ({p.sku})
                   </option>
@@ -148,7 +218,7 @@ const StockPage = () => {
               />
             </div>
 
-            {/* Performed by — readonly, shows current user */}
+            {/* Performed by */}
             <div className="mb-5">
               <label
                 className="text-xs font-medium uppercase tracking-wider mb-1.5 block"
@@ -204,6 +274,7 @@ const StockPage = () => {
               onClick={handleSubmit}
               className={`w-full py-2.5 rounded-lg text-sm font-semibold text-white ${clickClass}`}
               style={{ background: tab === "STOCK_IN" ? "#10b981" : "#e24815" }}
+              disabled={isRealUser && !productsLoaded}
             >
               Confirm {tab === "STOCK_IN" ? "Stock In" : "Stock Out"}
             </button>
@@ -251,7 +322,16 @@ const StockPage = () => {
               </thead>
               <tbody>
                 {entries.map((e, i) => {
-                  const prod = getProd(e.productId);
+                  const prod = {
+                    name:
+                      (e as any).product?.name ??
+                      getProd(e.productId)?.name ??
+                      "—",
+                    sku:
+                      (e as any).product?.sku ??
+                      getProd(e.productId)?.sku ??
+                      "—",
+                  };
                   const isIn = e.type === "STOCK_IN";
                   return (
                     <tr
@@ -268,11 +348,9 @@ const StockPage = () => {
                           year: "2-digit",
                         })}
                       </td>
-                      <td className="px-4 py-3 text-white">
-                        {prod?.name ?? "—"}
-                      </td>
+                      <td className="px-4 py-3 text-white">{prod.name}</td>
                       <td className="px-4 py-3" style={{ color: "#888" }}>
-                        {prod?.sku ?? "—"}
+                        {prod.sku}
                       </td>
                       <td className="px-4 py-3">
                         <span
@@ -300,13 +378,14 @@ const StockPage = () => {
                       <td className="px-4 py-3" style={{ color: "#666" }}>
                         {e.note || "—"}
                       </td>
-                      {/* ← NEW: performed by column */}
                       <td className="px-4 py-3">
                         <span
                           className="text-xs px-2 py-0.5 rounded"
                           style={{ background: "#2a2a2a", color: "#aaa" }}
                         >
-                          {(e as any).performedBy ?? "—"}
+                          {(e as any).user?.name ??
+                            (e as any).performedBy ??
+                            "—"}
                         </span>
                       </td>
                     </tr>
@@ -314,6 +393,12 @@ const StockPage = () => {
                 })}
               </tbody>
             </table>
+            {entries.length === 0 && (
+              <div className="py-12 text-center" style={{ color: "#555" }}>
+                <TrendingUp size={28} className="mx-auto mb-2 opacity-20" />
+                <p className="text-sm">No stock movements yet.</p>
+              </div>
+            )}
           </div>
 
           {/* Mobile cards */}
@@ -322,94 +407,118 @@ const StockPage = () => {
               Movement History
             </p>
             <div className="flex flex-col gap-3">
-              {entries.map((e) => {
-                const prod = getProd(e.productId);
-                const isIn = e.type === "STOCK_IN";
-                return (
-                  <div
-                    key={e.id}
-                    className="rounded-xl p-4"
-                    style={{
-                      background: "#1e1e1e",
-                      border: "1px solid #242424",
-                    }}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div
-                          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                          style={{
-                            background: isIn ? "#10b98120" : "#e2481520",
-                          }}
-                        >
-                          {isIn ? (
-                            <TrendingUp
-                              size={14}
-                              style={{ color: "#10b981" }}
-                            />
-                          ) : (
-                            <TrendingDown
-                              size={14}
-                              style={{ color: "#e24815" }}
-                            />
-                          )}
+              {entries.length === 0 ? (
+                <div
+                  className="py-10 text-center rounded-xl"
+                  style={{
+                    background: "#1e1e1e",
+                    border: "1px solid #242424",
+                    color: "#555",
+                  }}
+                >
+                  <TrendingUp size={24} className="mx-auto mb-2 opacity-20" />
+                  <p className="text-sm">No stock movements yet.</p>
+                </div>
+              ) : (
+                entries.map((e) => {
+                  const prod = {
+                    name:
+                      (e as any).product?.name ??
+                      getProd(e.productId)?.name ??
+                      "—",
+                    sku:
+                      (e as any).product?.sku ??
+                      getProd(e.productId)?.sku ??
+                      "—",
+                  };
+                  const isIn = e.type === "STOCK_IN";
+                  return (
+                    <div
+                      key={e.id}
+                      className="rounded-xl p-4"
+                      style={{
+                        background: "#1e1e1e",
+                        border: "1px solid #242424",
+                      }}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div
+                            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                            style={{
+                              background: isIn ? "#10b98120" : "#e2481520",
+                            }}
+                          >
+                            {isIn ? (
+                              <TrendingUp
+                                size={14}
+                                style={{ color: "#10b981" }}
+                              />
+                            ) : (
+                              <TrendingDown
+                                size={14}
+                                style={{ color: "#e24815" }}
+                              />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-white truncate">
+                              {prod.name}
+                            </p>
+                            <p className="text-xs" style={{ color: "#666" }}>
+                              {prod.sku}
+                            </p>
+                          </div>
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-white truncate">
-                            {prod?.name ?? "—"}
+                        <div className="text-right shrink-0 ml-2">
+                          <p
+                            className="text-base font-bold"
+                            style={{ color: isIn ? "#10b981" : "#e24815" }}
+                          >
+                            {isIn ? "+" : "-"}
+                            {e.quantity}
                           </p>
-                          <p className="text-xs" style={{ color: "#666" }}>
-                            {prod?.sku ?? "—"}
-                          </p>
+                          <span
+                            className="text-xs px-1.5 py-0.5 rounded"
+                            style={{
+                              background: isIn ? "#10b98120" : "#e2481520",
+                              color: isIn ? "#10b981" : "#e24815",
+                            }}
+                          >
+                            {isIn ? "STOCK IN" : "STOCK OUT"}
+                          </span>
                         </div>
                       </div>
-                      <div className="text-right shrink-0 ml-2">
-                        <p
-                          className="text-base font-bold"
-                          style={{ color: isIn ? "#10b981" : "#e24815" }}
-                        >
-                          {isIn ? "+" : "-"}
-                          {e.quantity}
-                        </p>
+                      <div
+                        className="flex items-center justify-between text-xs"
+                        style={{ color: "#555" }}
+                      >
+                        <span>{e.note || "No note"}</span>
+                        <span>
+                          {new Date(e.createdAt).toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                      <div className="mt-2 flex items-center gap-1.5">
+                        <span className="text-xs" style={{ color: "#555" }}>
+                          By:
+                        </span>
                         <span
-                          className="text-xs px-1.5 py-0.5 rounded"
-                          style={{
-                            background: isIn ? "#10b98120" : "#e2481520",
-                            color: isIn ? "#10b981" : "#e24815",
-                          }}
+                          className="text-xs px-2 py-0.5 rounded"
+                          style={{ background: "#2a2a2a", color: "#aaa" }}
                         >
-                          {isIn ? "STOCK IN" : "STOCK OUT"}
+                          {(e as any).user?.name ??
+                            (e as any).performedBy ??
+                            "—"}
                         </span>
                       </div>
                     </div>
-                    <div
-                      className="flex items-center justify-between text-xs"
-                      style={{ color: "#555" }}
-                    >
-                      <span>{e.note || "No note"}</span>
-                      <span>
-                        {new Date(e.createdAt).toLocaleDateString("en-IN", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "2-digit",
-                        })}
-                      </span>
-                    </div>
-                    {/* ← NEW: performed by on mobile */}
-                    <div className="mt-2 flex items-center gap-1.5">
-                      <span className="text-xs" style={{ color: "#555" }}>
-                        By:
-                      </span>
-                      <span
-                        className="text-xs px-2 py-0.5 rounded"
-                        style={{ background: "#2a2a2a", color: "#aaa" }}
-                      >
-                        {(e as any).performedBy ?? "—"}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
         </div>

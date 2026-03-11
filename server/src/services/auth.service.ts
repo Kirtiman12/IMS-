@@ -3,10 +3,10 @@ import jwt       from "jsonwebtoken";
 import { prisma } from "@/prisma/client";
 
 const signAccess  = (payload: object) =>
-  jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET!,  { expiresIn: process.env.ACCESS_TOKEN_EXPIRY  as any });
+  jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET!,  { expiresIn: process.env.ACCESS_TOKEN_EXPIRES  as any });
 
 const signRefresh = (payload: object) =>
-  jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: process.env.REFRESH_TOKEN_EXPIRY as any });
+  jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: process.env.REFRESH_TOKEN_EXPIRES as any });
 
 export const loginUser = async (email: string, password: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
@@ -22,13 +22,13 @@ export const loginUser = async (email: string, password: string) => {
   await prisma.user.update({ where: { id: user.id }, data: { refreshToken } });
 
   return {
+    message:      `Welcome back, ${user.name}!`,  // 👈
     accessToken,
     refreshToken,
     user: { id: user.id, name: user.name, email: user.email, role: user.role },
   };
 };
 
-// ← NEW
 export const registerUser = async (data: {
   name:     string;
   email:    string;
@@ -56,6 +56,7 @@ export const registerUser = async (data: {
   await prisma.user.update({ where: { id: user.id }, data: { refreshToken } });
 
   return {
+    message:      `Account created successfully. Welcome, ${user.name}!`,  // 👈
     accessToken,
     refreshToken,
     user: { id: user.id, name: user.name, email: user.email, role: user.role },

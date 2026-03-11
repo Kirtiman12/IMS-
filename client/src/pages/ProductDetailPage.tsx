@@ -186,7 +186,6 @@ const ProductDetailPage = () => {
           </h2>
 
           <InfoRow icon={Hash} label="SKU" value={product.sku} />
-          <InfoRow icon={Tag} label="Category" value={category} />
           <InfoRow icon={Truck} label="Vendor" value={vendor} />
           <InfoRow
             icon={User}
@@ -197,8 +196,8 @@ const ProductDetailPage = () => {
             icon={DollarSign}
             label="Price"
             value={
-              product.price && product.price > 0
-                ? `₹${product.price.toFixed(2)}`
+              product.price && Number(product.price) > 0
+                ? `₹${Number(product.price).toFixed(2)}`
                 : "—"
             }
           />

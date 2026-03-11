@@ -4,7 +4,10 @@ import { useAppDispatch } from "@/app/hooks";
 import { loginSuccess } from "../store/authSlice";
 import { HARDCODED_USERS, type Role } from "@/mock/mockData";
 import useClickEffect from "@/hooks/useClickEffect";
-import { BoxIcon, Eye, EyeOff } from "lucide-react";
+import { BoxIcon, Eye, EyeOff, ChevronDown } from "lucide-react";
+import api from "@/services/axiosInstance";
+
+type DemoRole = Role | "CUSTOM";
 
 const ROLE_MAP: Record<Role, (typeof HARDCODED_USERS)[0]> = {
   ADMIN: HARDCODED_USERS[0],
@@ -15,43 +18,81 @@ const ROLE_MAP: Record<Role, (typeof HARDCODED_USERS)[0]> = {
 const LoginPage = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const [role, setRole] = useState<Role>("ADMIN");
+
+  const [selectedRole, setSelectedRole] = useState<DemoRole>("ADMIN");
   const [email, setEmail] = useState(HARDCODED_USERS[0].email);
   const [password, setPassword] = useState(HARDCODED_USERS[0].password);
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const { clickClass, handleClick } = useClickEffect("click-press");
 
-  const onRoleChange = (r: Role) => {
-    setRole(r);
-    setEmail(ROLE_MAP[r].email);
-    setPassword(ROLE_MAP[r].password);
+  const onRoleChange = (val: DemoRole) => {
+    setSelectedRole(val);
     setError("");
+    if (val !== "CUSTOM") {
+      setEmail(ROLE_MAP[val].email);
+      setPassword(ROLE_MAP[val].password);
+    } else {
+      setEmail("");
+      setPassword("");
+    }
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     handleClick();
-    const user = HARDCODED_USERS.find(
-      (u) => u.email === email && u.password === password,
-    );
-    if (!user) {
-      setError("Invalid credentials.");
-      return;
-    }
-    dispatch(
-      loginSuccess({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      }),
-    );
-    navigate("/dashboard");
+
+    setTimeout(async () => {
+      setLoading(true);
+      setError("");
+
+      // — MOCK path: demo roles
+      if (selectedRole !== "CUSTOM") {
+        const user = HARDCODED_USERS.find(
+          (u) => u.email === email && u.password === password,
+        );
+        if (!user) {
+          setError("Invalid demo credentials.");
+          setLoading(false);
+          return;
+        }
+        dispatch(
+          loginSuccess({
+            user: {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              role: user.role,
+            },
+            token: null,
+          }),
+        );
+        navigate("/dashboard");
+        setLoading(false);
+        return;
+      }
+
+      // — REAL API path: custom login
+      try {
+        const res = await api.post("/auth/login", { email, password });
+        dispatch(
+          loginSuccess({
+            user: res.data.user,
+            token: res.data.accessToken,
+          }),
+        );
+        navigate("/dashboard");
+      } catch (err: any) {
+        setError(err.response?.data?.message ?? "Invalid credentials.");
+      } finally {
+        setLoading(false);
+      }
+    }, 300);
   };
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center"
+      className="min-h-screen flex items-center justify-center scale-[0.85] md:scale-[1]"
       style={{ background: "#191818" }}
     >
       <div
@@ -76,10 +117,10 @@ const LoginPage = () => {
 
         <h2 className="text-2xl font-bold text-white mb-1">Sign In</h2>
         <p className="text-sm mb-6" style={{ color: "#666" }}>
-          Select role to auto-fill demo credentials
+          Select a role to auto-fill demo credentials, or use a real account
         </p>
 
-        {/* Role Tabs */}
+        {/* Role Dropdown */}
         <div className="mb-5">
           <label
             className="text-xs font-medium uppercase tracking-wider mb-2 block"
@@ -87,22 +128,40 @@ const LoginPage = () => {
           >
             Login As
           </label>
-          <div className="grid grid-cols-3 gap-2">
-            {(["ADMIN", "MANAGER", "VIEWER"] as Role[]).map((r) => (
-              <button
-                key={r}
-                onClick={() => onRoleChange(r)}
-                className="py-2 rounded-lg text-sm font-medium transition-all"
-                style={{
-                  background: role === r ? "#e24815" : "#2a2a2a",
-                  color: role === r ? "white" : "#888",
-                  border: `1px solid ${role === r ? "#e24815" : "#333"}`,
-                }}
-              >
-                {r.charAt(0) + r.slice(1).toLowerCase()}
-              </button>
-            ))}
+          <div className="relative">
+            <select
+              value={selectedRole}
+              onChange={(e) => onRoleChange(e.target.value as DemoRole)}
+              className="w-full px-4 py-3 rounded-lg text-sm outline-none appearance-none cursor-pointer pr-10"
+              style={{
+                background: "#2a2a2a",
+                border: "1px solid #333",
+                color: selectedRole === "CUSTOM" ? "#60a5fa" : "#e24815",
+              }}
+            >
+              <option value="ADMIN">Demo — Admin</option>
+              <option value="MANAGER">Demo — Manager</option>
+              <option value="VIEWER">Demo — Viewer</option>
+              <option value="CUSTOM">Custom (Real Account)</option>
+            </select>
+            {/* Chevron icon */}
+            <div
+              className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              style={{
+                color: selectedRole === "CUSTOM" ? "#60a5fa" : "#e24815",
+              }}
+            >
+              <ChevronDown size={16} />
+            </div>
           </div>
+          <p
+            className="text-xs mt-1.5"
+            style={{ color: selectedRole === "CUSTOM" ? "#60a5fa" : "#555" }}
+          >
+            {selectedRole === "CUSTOM"
+              ? "Enter your registered account credentials"
+              : "Demo credentials auto-filled below ↓"}
+          </p>
         </div>
 
         {/* Email */}
@@ -117,6 +176,7 @@ const LoginPage = () => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            placeholder={selectedRole === "CUSTOM" ? "your@email.com" : ""}
             className="w-full px-4 py-3 rounded-lg text-white text-sm outline-none"
             style={{ background: "#2a2a2a", border: "1px solid #333" }}
           />
@@ -135,6 +195,7 @@ const LoginPage = () => {
               type={showPass ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder={selectedRole === "CUSTOM" ? "••••••••" : ""}
               className="w-full px-4 py-3 rounded-lg text-white text-sm outline-none pr-11"
               style={{ background: "#2a2a2a", border: "1px solid #333" }}
             />
@@ -152,13 +213,14 @@ const LoginPage = () => {
 
         <button
           onClick={handleLogin}
-          className={`w-full py-3 rounded-lg font-semibold text-white text-sm ${clickClass}`}
+          disabled={loading}
+          className={`w-full py-3 rounded-lg font-semibold text-white text-sm ${clickClass} disabled:opacity-50 disabled:cursor-not-allowed`}
           style={{ background: "#e24815" }}
         >
-          Sign In
+          {loading ? "Signing in..." : "Sign In"}
         </button>
 
-        {/* ← NEW: Register link */}
+        {/* Register link */}
         <p className="text-center text-sm mt-5" style={{ color: "#555" }}>
           Don't have an account?{" "}
           <Link
@@ -170,23 +232,25 @@ const LoginPage = () => {
           </Link>
         </p>
 
-        {/* Demo hint */}
-        <div
-          className="mt-5 p-3 rounded-lg"
-          style={{ background: "#242424", border: "1px solid #2a2a2a" }}
-        >
-          <p
-            className="text-xs font-semibold mb-1"
-            style={{ color: "#f5c573" }}
+        {/* Demo hint — only show for demo modes */}
+        {selectedRole !== "CUSTOM" && (
+          <div
+            className="mt-5 p-3 rounded-lg"
+            style={{ background: "#242424", border: "1px solid #2a2a2a" }}
           >
-            Demo Credentials
-          </p>
-          {HARDCODED_USERS.map((u) => (
-            <p key={u.id} className="text-xs" style={{ color: "#555" }}>
-              {u.role}: {u.email} / {u.password}
+            <p
+              className="text-xs font-semibold mb-1"
+              style={{ color: "#f5c573" }}
+            >
+              Demo Credentials
             </p>
-          ))}
-        </div>
+            {HARDCODED_USERS.map((u) => (
+              <p key={u.id} className="text-xs" style={{ color: "#555" }}>
+                {u.role}: {u.email} / {u.password}
+              </p>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

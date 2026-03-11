@@ -57,5 +57,5 @@ export const logout = async (req: Request, res: Response) => {
 };
 
 export const getMe = async (req: Request, res: Response) => {
-  res.json({ user: req.user });
+  res.json({ user: req?.user });
 };
